@@ -44,7 +44,7 @@ kickermanagerControllers.controller('RankingCtrl', function($scope, Ranking) {
 	}	
 });
 
-kickermanagerControllers.controller('MatchCtrl', function($scope, $http, Match, History, Stats, Players) {
+kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, History, Statistic, Player) {
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	
@@ -53,7 +53,7 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, Match, 
 	}
 
 	$scope.loadDailyStats = function() {
-		$scope.dailyStats = Stats.query({type:'daily', param:'today'});
+		$scope.dailyStats = Statistic.query({type:'daily', param:'today'});
 	}
 	
 	$http.get("api/settings").success(function(response) {
@@ -62,7 +62,10 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, Match, 
 		$scope.resetCtrl();
 	});
 
-	$scope.players = Players.query();
+	Player.query().$promise.then(function(response) {
+		$scope.players = $filter('active')(response);
+	});
+
 	$scope.loadHistory();
 	$scope.loadDailyStats();
 
@@ -123,7 +126,7 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, Match, 
 	};
 });
 
-kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Players) {
+kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Player, Statistic, $filter) {
 	$scope.$emit('setTitle', 'Statistik');
 
 	$scope.chartConfig = {
@@ -166,7 +169,9 @@ kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Pl
 			}
 		};
 	
-	$scope.players = Players.query();
+	Player.query().$promise.then(function(response) {
+		$scope.players = $filter('active')(response);
+	});
 	
 	$scope.player1 = null;
 	$scope.player2 = null;
@@ -177,7 +182,8 @@ kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Pl
 			if ($scope.player2 != null) {
 				var playerString = playerString + "," + $scope.player2;
 			}
-			$http.get("api/stats/elotrend/" + playerString).success(function(response) {
+			Statistic.query({type:'elotrend', param:playerString}).$promise.then(function(response) {
+				// convert date strings for highcharts
 				for (var s in response) {
 					for (var d in response[s].data) {
 						var parts = response[s].data[d][0].split('-');
@@ -190,8 +196,22 @@ kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Pl
 	}
 });
 
-kickermanagerControllers.controller('PlayerSetupCtrl', function($scope) {
+kickermanagerControllers.controller('PlayerSetupCtrl', function($scope, Player) {
 	$scope.$emit('setTitle', 'Spielerverwaltung');
+	$scope.result = { text: '', error: false, icon: '' }
+	$scope.addPlayer = function() {
+		Player.save({name: $scope.newplayer}).$promise.then(
+			function (response) {
+				$scope.result = {text: 'Spieler ' + response.name + ' erfolgreich hinzugefügt.', error: false }
+			},
+			function (response) {
+				if (response.data.error) {
+					$scope.result = {text: response.data.error.text, error: true }
+				}
+			}
+		);
+	}
+
 });
 
 kickermanagerControllers.controller('ConfigurationCtrl', function($scope) {

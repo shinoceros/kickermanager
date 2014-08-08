@@ -39,16 +39,10 @@
 		}
 
 		//************************ PUBLIC METHODS ****************************
-		public function GetActivePlayers()
-		{
-			$query = "SELECT `id` , `name` FROM `players` WHERE `active` = 1 ORDER BY `name` ASC";
-			$this->FillResultArray($query);
-			return $this->resultArray;
-		}
 
 		public function GetPlayers($method = 'default')
 		{
-			$query = "SELECT `id`, `name`, `active` FROM `players`";
+			$query = "SELECT `id`, `name`, `active` FROM `players` ORDER BY `name` ASC";
 			$this->FillResultArray($query, $method);
 			return $this->resultArray;
 		}
@@ -192,6 +186,21 @@
 						$match['goals2'],
 						$match['deltaelo'],
 						$settings['currentSeason']);
+			$result = $this->mysqli->query($query);
+			return $this->mysqli->insert_id;
+		}
+		
+		public function AddPlayer($player)
+		{
+			$query = sprintf("SELECT * FROM `players` WHERE `name` = '%s'",
+						$player['name']);
+			$result = $this->mysqli->query($query);
+			if (0 != $result->num_rows)
+			{
+				throw new Exception('Spieler '.$player['name'].' existiert bereits!');
+			}
+			$query = sprintf("INSERT INTO `players` (`name`, `active`) VALUES ('%s', 1)",
+						$player['name']);
 			$result = $this->mysqli->query($query);
 			return $this->mysqli->insert_id;
 		}
