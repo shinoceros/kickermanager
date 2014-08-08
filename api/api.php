@@ -40,11 +40,18 @@
 			$db = DB::GetInstance();
 			$settings = $db->GetSettings();
 			$r = $db->GetRanking($settings['currentSeason'], 'index');
+			// if ids of players can not be found in ranking table they haven't played -> use base elo as input elo
+			$eloIn = array(
+				array_key_exists($match['f1'], $r) ? $r[$match['f1']]['elo'] : $settings['baseELO'],
+				array_key_exists($match['b1'], $r) ? $r[$match['b1']]['elo'] : $settings['baseELO'],
+				array_key_exists($match['f2'], $r) ? $r[$match['f2']]['elo'] : $settings['baseELO'],
+				array_key_exists($match['b2'], $r) ? $r[$match['b2']]['elo'] : $settings['baseELO']
+			);
 			$match['deltaelo'] = calcDeltaELO(
-				$r[$match['f1']]['elo'],
-				$r[$match['b1']]['elo'],
-				$r[$match['f2']]['elo'],
-				$r[$match['b2']]['elo'],
+				$eloIn[0],
+				$eloIn[1],
+				$eloIn[2],
+				$eloIn[3],
 				$match['goals1'],
 				$match['goals2']
 			);
@@ -105,7 +112,8 @@
 	{
 		$db = DB::GetInstance();
 		// TODO: für alle seasons verfügbar machen
-		$results = $db->GetRanking(5);
+		$settings = $db->GetSettings();
+		$results = $db->GetRanking($settings['currentSeason']);
 		header('Content-Type: application/json');
 		echo json_encode_utf8($results);
 	}

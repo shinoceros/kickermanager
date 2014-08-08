@@ -45,7 +45,7 @@ kickermanagerControllers.controller('RankingCtrl', function($scope, Ranking) {
 });
 
 kickermanagerControllers.controller('MatchCtrl', function($scope, $http, Match, History, Stats, Players) {
-	$scope.$emit('setTitle', 'Spiel hinzufügen');
+	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	
 	$scope.loadHistory = function() {
@@ -58,7 +58,7 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, Match, 
 	
 	$http.get("api/settings").success(function(response) {
 		$scope.settings = response;
-		$scope.$emit('setTitle', 'Spiel hinzufügen - Saison ' + $scope.settings.currentSeason);
+		$scope.$emit('setTitle', 'Spiel eintragen - Saison ' + $scope.settings.currentSeason);
 		$scope.resetCtrl();
 	});
 
@@ -129,11 +129,16 @@ kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Pl
 	$scope.chartConfig = {
 			options: {
 				chart: { type: 'line' },
+				colors: ['#7cb5ec', '#f7a35c'],
 				title: { text: 'ELO-Trend' },
+				tooltip: {
+					dateTimeLabelFormats: {day:"%d.%m.%Y"},
+					pointFormat: "ELO: {point.y:.1f}"
+				},
 				xAxis: {
 					type: 'datetime',
 					dateTimeLabelFormats: {
-						month: '%e. %b',
+						month: '%d.%m.',
 						year: '%b'
 					},
 					title: {
@@ -173,6 +178,12 @@ kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Pl
 				var playerString = playerString + "," + $scope.player2;
 			}
 			$http.get("api/stats/elotrend/" + playerString).success(function(response) {
+				for (var s in response) {
+					for (var d in response[s].data) {
+						var parts = response[s].data[d][0].split('-');
+						response[s].data[d][0] = Date.UTC(parts[0], parts[1]-1, parts[2]);
+					}
+				}
 				$scope.chartConfig.series = response;
 			});
 		}
