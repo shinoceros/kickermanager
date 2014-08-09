@@ -1,1 +1,20 @@
-TODO Player Setup
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="col-xs-12 col-sd-12 col-lg-12">
+			<label for="newplayer">Neuer Spieler</label>
+		    <div class="input-group">
+				<input type="text" class="form-control" id="newplayer" ng-model="newplayer">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" ng-click="addPlayer()">Eintragen</button>
+				</span>
+			</div>
+		</div>
+	</div>
+	<div class="row-fluid">
+		<div class="col-xs-12 col-sd-12 col-lg-12" ng-class="{'text-danger': result.error, 'text-success': !result.error}">
+			<div class="alert" ng-show="result.text.length" ng-class="{'alert-danger': result.error, 'alert-success': !result.error}">
+				<i class="fa text-right" ng-class="{'fa-exclamation-triangle': result.error, 'fa-check': !result.error}"></i> {{result.text}}
+			</div>
+		</div>
+	</div>
+</div>

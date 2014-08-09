@@ -22,3 +22,15 @@ kickermanagerFilters.filter('percent', function() {
 		return f.toFixed(size) + "%";
 	}
 });
+
+kickermanagerFilters.filter('active', function() {
+	return function (players) {
+		var filtered = [];
+		for (var i in players) {
+			if (players[i].active == 1) {
+				filtered.push(players[i]);
+			}
+		}
+		return filtered;
+	};
+});
