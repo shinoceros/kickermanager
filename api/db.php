@@ -39,16 +39,10 @@
 		}
 
 		//************************ PUBLIC METHODS ****************************
-		public function GetActivePlayers()
-		{
-			$query = "SELECT `id` , `name` FROM `players` WHERE `active` = 1 ORDER BY `name` ASC";
-			$this->FillResultArray($query);
-			return $this->resultArray;
-		}
 
 		public function GetPlayers($method = 'default')
 		{
-			$query = "SELECT `id`, `name`, `active` FROM `players`";
+			$query = "SELECT `id`, `name`, `active` FROM `players` ORDER BY `name` ASC";
 			$this->FillResultArray($query, $method);
 			return $this->resultArray;
 		}
@@ -85,7 +79,7 @@
 			$query = "SELECT
 						p.id,
 						p.name,
-						1200 + sum(m.deltaelo) AS elo,
+						1200 + SUM(m.deltaelo) AS elo,
 						COUNT(*) AS total,
 						SUM(IF(owngoals > oppgoals, 1, 0)) AS wins,
 						SUM(owngoals) - SUM(oppgoals) AS goaldiff,
@@ -101,7 +95,7 @@
 							SELECT b2 AS pos, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, season FROM matches
 						) AS m ON p.id = m.pos
  						WHERE m.season = $season
-						GROUP BY (p.id)";
+						GROUP BY p.id";
 
 			$this->FillResultArray($query, $method);
 			return $this->resultArray;
@@ -125,7 +119,7 @@
 		public function GetELOTrendFor($pid, $season)
 		{
 			$query = "SELECT
-						1000 * UNIX_TIMESTAMP(DATE(m.timestamp)) AS date,
+						DATE(m.timestamp) AS date,
 						sum(m.deltaelo) AS elo
 						FROM players p
 						LEFT JOIN (
@@ -146,7 +140,7 @@
 			while ($row = $result->fetch_array(MYSQLI_ASSOC))
 			{
 				$elo += $row['elo'];
-				$this->resultArray[] = array((int)$row['date'], $elo);
+				$this->resultArray[] = array($row['date'], $elo);
 			}
 			$result->free();
 			return $this->resultArray;
@@ -192,6 +186,21 @@
 						$match['goals2'],
 						$match['deltaelo'],
 						$settings['currentSeason']);
+			$result = $this->mysqli->query($query);
+			return $this->mysqli->insert_id;
+		}
+		
+		public function AddPlayer($player)
+		{
+			$query = sprintf("SELECT * FROM `players` WHERE `name` = '%s'",
+						$player['name']);
+			$result = $this->mysqli->query($query);
+			if (0 != $result->num_rows)
+			{
+				throw new Exception('Spieler '.$player['name'].' existiert bereits!');
+			}
+			$query = sprintf("INSERT INTO `players` (`name`, `active`) VALUES ('%s', 1)",
+						$player['name']);
 			$result = $this->mysqli->query($query);
 			return $this->mysqli->insert_id;
 		}
