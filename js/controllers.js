@@ -198,11 +198,15 @@ kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Pl
 
 kickermanagerControllers.controller('PlayerSetupCtrl', function($scope, Player) {
 	$scope.$emit('setTitle', 'Spielerverwaltung');
+	$scope.selectedPlayer = null;
+	$scope.updating = false;
 	$scope.result = { text: '', error: false, icon: '' }
+
 	$scope.addPlayer = function() {
 		Player.save({name: $scope.newplayer}).$promise.then(
 			function (response) {
 				$scope.result = {text: 'Spieler ' + response.name + ' erfolgreich hinzugefügt.', error: false }
+				$scope.loadPlayers();
 			},
 			function (response) {
 				if (response.data.error) {
@@ -211,7 +215,23 @@ kickermanagerControllers.controller('PlayerSetupCtrl', function($scope, Player) 
 			}
 		);
 	}
-
+	$scope.loadPlayers = function() {
+		$scope.players = Player.query();
+	};
+	$scope.loadPlayers();
+	
+	$scope.updatePlayer = function() {
+		$scope.updating = true;
+		Player.update({id: $scope.selectedPlayer.id, active: $scope.selectedPlayer.active}).$promise.then(
+			function(success) {
+				$scope.updating = false;
+			},
+			function(error) {
+				console.log(error);
+				$scope.updating = false;
+			}
+		);
+	}
 });
 
 kickermanagerControllers.controller('ConfigurationCtrl', function($scope) {

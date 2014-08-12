@@ -151,6 +151,21 @@
 		}
 	});
 
+	// PUT ROUTES
+	// update player
+	$app->put('/player', function () use ($app) {
+		try {
+			$request = $app->request();
+			$player = json_decode($request->getBody(), true);
+			$db = DB::GetInstance();
+			$player = $db->UpdatePlayer($player);
+			echo json_encode_utf8($player);
+		} catch(Exception $e) {
+			HandleError($e);
+		}
+	});
+
+
 	// run
 	$app->run();
 	exit;

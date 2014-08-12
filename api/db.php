@@ -205,6 +205,19 @@
 			return $this->mysqli->insert_id;
 		}
 		
+		public function UpdatePlayer($player)
+		{
+			$query = sprintf("UPDATE `players` SET `active` = %d WHERE `id` = %d",
+						$player['active'],
+						$player['id']);
+			$result = $this->mysqli->query($query);
+			if (1 != $this->mysqli->affected_rows)
+			{
+				throw new Exception('Spieler existiert nicht!');
+			}
+			return $player;
+		}
+
 		public function UpdateMatch($match)
 		{
 			$query = sprintf("UPDATE `matches` SET `f1` = %d, `b1` = %d, `f2` = %d, `b2` = %d, `goals1` = %d, `goals2` = %d, `deltaelo` = %f, `timestamp` = '%s', `season` = %d

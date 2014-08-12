@@ -5,7 +5,12 @@ kickermanagerServices.factory('Ranking', function($resource) {
 });
 
 kickermanagerServices.factory('Player', function($resource) {
-	return $resource('api/player?nocache=' + (new Date()).getTime());
+	return $resource('api/player/:playerId', {}, {
+		query: {method:'GET', params:{playerId:''}, isArray:true},
+		post: {method:'POST'},
+		update: {method:'PUT', params: {playerId: '@playerId'}},
+		remove: {method:'DELETE'}
+	});
 });
 
 kickermanagerServices.factory('Match', function($resource) {

@@ -1,7 +1,7 @@
 'use strict';
 
 var kickermanagerApp = angular.module('kickermanagerApp', [
-	'ui.bootstrap.collapse',
+	'ui.bootstrap',
 	'ngRoute',
 	'kickermanagerControllers',
 	'kickermanagerServices',
