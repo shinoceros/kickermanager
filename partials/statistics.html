@@ -1,12 +1,12 @@
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-xs-5 col-sd-5 col-md-5">
-			<select ng-model="player1" ng-disabled="!players.length || !settings" ng-options="p.id as p.name for p in players" class="form-control" id="p1">
+			<select ng-model="player1" ng-disabled="!players.length || !settings" ng-options="p.id as p.name for p in players | orderBy: 'name'" class="form-control" id="p1">
 				<option value="">-- ausw&auml;hlen --</option>
 			</select>
 		</div>
 		<div class="col-xs-5 col-sd-5 col-md-5">
-			<select ng-model="player2" ng-disabled="!players.length || !settings" ng-options="p.id as p.name for p in players" class="form-control" id="p2">
+			<select ng-model="player2" ng-disabled="!players.length || !settings" ng-options="p.id as p.name for p in players | orderBy: 'name'" class="form-control" id="p2">
 				<option value="">-- ausw&auml;hlen --</option>
 			</select>
 		</div>
