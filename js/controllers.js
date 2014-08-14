@@ -2,15 +2,15 @@
 
 /* Controllers */
 
-var kickermanagerControllers = angular.module('kickermanagerControllers', []);
+var kmControllers = angular.module('kmControllers', []);
 
-kickermanagerControllers.controller('PageCtrl', function ($scope, $location) {
+kmControllers.controller('PageCtrl', function ($scope, $location) {
 	$scope.tabs = [
-		{ link : '#/match', label : 'Spiel', icon: 'edit' },
-		{ link : '#/ranking', label : 'Tabelle', icon: 'trophy' },
-		{ link : '#/statistics', label : 'Statistik', icon: 'bar-chart-o' },
-		{ link : '#/playersetup', label : 'Spieler', icon: 'user' },
-		{ link : '#/administration', label : 'Administration', icon: 'cog' }
+		{ link : 'match', label : 'Spiel', icon: 'edit' },
+		{ link : 'ranking', label : 'Tabelle', icon: 'trophy' },
+		{ link : 'statistics', label : 'Statistik', icon: 'bar-chart-o' },
+		{ link : 'playersetup', label : 'Spieler', icon: 'user' },
+		{ link : 'administration', label : 'Administration', icon: 'cog' }
 	]; 
     
 	$scope.isCollapsed = true;
@@ -35,7 +35,7 @@ kickermanagerControllers.controller('PageCtrl', function ($scope, $location) {
 	}
 });
 
-kickermanagerControllers.controller('RankingCtrl', function($scope, Ranking) {
+kmControllers.controller('RankingCtrl', function($scope, Ranking) {
 	$scope.$emit('setTitle', 'Tabelle');
 	$scope.ranking = Ranking.query();
 	$scope.players = null;
@@ -45,7 +45,7 @@ kickermanagerControllers.controller('RankingCtrl', function($scope, Ranking) {
 	}	
 });
 
-kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Settings, History, Statistic, Player) {
+kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Settings, History, Statistic, Player) {
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
@@ -139,7 +139,7 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter
 	};
 });
 
-kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
+kmControllers.controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
 	$scope.$emit('setTitle', 'Statistik');
 
 	Settings.get().$promise.then(function(response) {
@@ -213,7 +213,7 @@ kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Se
 	}
 });
 
-kickermanagerControllers.controller('PlayerSetupCtrl', function($scope, Player) {
+kmControllers.controller('PlayerSetupCtrl', function($scope, Player) {
 	$scope.$emit('setTitle', 'Spielerverwaltung');
 	$scope.selectedPlayer = null;
 	$scope.updating = false;
@@ -251,7 +251,7 @@ kickermanagerControllers.controller('PlayerSetupCtrl', function($scope, Player) 
 	}
 });
 
-kickermanagerControllers.controller('AdministrationCtrl', function($scope, $filter, Admin, Player, Match, History) {
+kmControllers.controller('AdministrationCtrl', function($scope, $filter, Admin, Player, Match, History) {
 	$scope.$emit('setTitle', 'Administration');
 	
 	$scope.checked = false;

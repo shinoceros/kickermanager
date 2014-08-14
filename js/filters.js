@@ -2,28 +2,28 @@
 
 /* Controllers */
 
-var kickermanagerFilters = angular.module('kickermanagerFilters', []);
+var kmFilters = angular.module('kmFilters', []);
 
-kickermanagerFilters.filter('float', function() {
+kmFilters.filter('float', function() {
 	return function(input, size) {
 		return input.toFixed(size);
 	}
 });
 
-kickermanagerFilters.filter('abs', function() {
+kmFilters.filter('abs', function() {
 	return function(input) {
 		return Math.abs(input);
 	}
 });
 
-kickermanagerFilters.filter('percent', function() {
+kmFilters.filter('percent', function() {
 	return function(input, size) {
 		var f = 100 * input;
 		return f.toFixed(size) + "%";
 	}
 });
 
-kickermanagerFilters.filter('active', function() {
+kmFilters.filter('active', function() {
 	return function (players) {
 		var filtered = [];
 		for (var i in players) {
