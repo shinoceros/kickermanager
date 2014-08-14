@@ -1,10 +1,10 @@
 <?php
 	include_once('dbconfig.php');
+	include_once('functions.php');
 	
 	class DB
 	{
 		private $mysqli;
-		private $resultArray;
 		private static $self = NULL;
 		
 		public static function GetInstance()
@@ -35,16 +35,14 @@
 			}
 
 			$this->mysqli->select_db($database);
-			$this->resultArray = null;
 		}
 
 		//************************ PUBLIC METHODS ****************************
 
 		public function GetPlayers($method = 'default')
 		{
-			$query = "SELECT `id`, `name`, `active` FROM `players` ORDER BY `name` ASC";
-			$this->FillResultArray($query, $method);
-			return $this->resultArray;
+			$query = "SELECT `id`, `name`, `active` FROM `players`";
+			return $this->FillResultArray($query, $method);
 		}
 
 		public function GetSettings()
@@ -52,14 +50,14 @@
 			$query = "SELECT `key`, `type`, `value` FROM `settings`";
 	
 			$result = $this->mysqli->query($query);
-			$this->resultArray = array();
+			$resultArray = array();
 			while ($row = $result->fetch_array(MYSQLI_ASSOC))
 			{
-				$this->resultArray[$row['key']] = ($row['type'] == 'int' ? intval($row['value']) : $row['value']);
+				$resultArray[$row['key']] = ($row['type'] == 'int' ? intval($row['value']) : $row['value']);
 			}
 			$result->free();
 			
-			return $this->resultArray;
+			return $resultArray;
 		}
 
 		public function GetMatchesForSeason($season)
@@ -69,17 +67,17 @@
 			WHERE season = %d
 			ORDER BY timestamp ASC", $season);
 			
-			$this->FillResultArray($query);
-			return $this->resultArray;
+			return $this->FillResultArray($query);
 		}		
 		
 		public function GetRanking($season, $method = 'default')
 		{
+			$settings = $this->GetSettings();
 			// avg (score), count(*)
 			$query = "SELECT
 						p.id,
 						p.name,
-						1200 + SUM(m.deltaelo) AS elo,
+						".$settings['baseELO']." + SUM(m.deltaelo) AS elo,
 						COUNT(*) AS total,
 						SUM(IF(owngoals > oppgoals, 1, 0)) AS wins,
 						SUM(owngoals) - SUM(oppgoals) AS goaldiff,
@@ -97,23 +95,18 @@
  						WHERE m.season = $season
 						GROUP BY p.id";
 
-			$this->FillResultArray($query, $method);
-			return $this->resultArray;
+			return $this->FillResultArray($query, $method);
 		}
 		
 		public function GetHistory($from, $to)
 		{
 			$query = sprintf(
-			"SELECT p1.name AS f1, p2.name AS b1, p3.name AS f2, p4.name AS b2, goals1, goals2, deltaelo, timestamp FROM matches m
-			LEFT JOIN players AS p1 ON p1.id = m.f1
-			LEFT JOIN players AS p2 ON p2.id = m.b1
-			LEFT JOIN players AS p3 ON p3.id = m.f2
-			LEFT JOIN players AS p4 ON p4.id = m.b2
-			WHERE DATE(timestamp) >= '%s' AND DATE(timestamp) <= '%s'
-			ORDER BY timestamp ASC", $from, $to);
+				"SELECT id, f1, b1, f2, b2, goals1, goals2, deltaelo, timestamp FROM matches m
+				WHERE DATE(timestamp) >= '%s' AND DATE(timestamp) <= '%s'
+				ORDER BY timestamp ASC",
+			$from, $to);
 			
-			$this->FillResultArray($query);
-			return $this->resultArray;
+			return $this->FillResultArray($query);
 		}
 		
 		public function GetELOTrendFor($pid, $season)
@@ -135,15 +128,16 @@
 						GROUP BY DATE(m.timestamp)";
 
 			$result = $this->mysqli->query($query);
-			$this->resultArray = array();
-			$elo = 1200.0;
+			$resultArray = array();
+			$settings = $this->GetSettings();
+			$elo = $settings['baseELO'];
 			while ($row = $result->fetch_array(MYSQLI_ASSOC))
 			{
 				$elo += $row['elo'];
-				$this->resultArray[] = array($row['date'], $elo);
+				$resultArray[] = array($row['date'], $elo);
 			}
 			$result->free();
-			return $this->resultArray;
+			return $resultArray;
 		}
 		
 		public function GetStatsDaily($date)
@@ -151,27 +145,25 @@
 			$query = sprintf(
 			"SELECT
 				p.id,
-				p.name,
 				sum(m.deltaelo) AS deltaelo,
 				COUNT(*) AS total,
 				SUM(IF(owngoals > oppgoals, 1, 0)) AS wins,
 				SUM(owngoals) - SUM(oppgoals) AS goaldiff
 				FROM players p
 				LEFT JOIN (
-				SELECT f1 AS pos, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, timestamp FROM matches
+				SELECT f1 AS id, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, timestamp FROM matches
 				UNION
-				SELECT b1 AS pos, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, timestamp FROM matches
+				SELECT b1 AS id, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, timestamp FROM matches
 				UNION
-				SELECT f2 AS pos, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, timestamp FROM matches
+				SELECT f2 AS id, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, timestamp FROM matches
 				UNION
-				SELECT b2 AS pos, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, timestamp FROM matches
-				) AS m ON p.id = m.pos
+				SELECT b2 AS id, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, timestamp FROM matches
+				) AS m ON p.id = m.id
 				WHERE DATE(timestamp) = '%s'
 				GROUP BY (p.id)"
 			, $date);
 			
-			$this->FillResultArray($query);
-			return $this->resultArray;
+			return $this->FillResultArray($query);
 		}
 
 		public function AddMatch($match)
@@ -220,38 +212,94 @@
 
 		public function UpdateMatch($match)
 		{
-			$query = sprintf("UPDATE `matches` SET `f1` = %d, `b1` = %d, `f2` = %d, `b2` = %d, `goals1` = %d, `goals2` = %d, `deltaelo` = %f, `timestamp` = '%s', `season` = %d
-							WHERE id = %d",
+			// get data of match to be updated
+			$query = sprintf("SELECT * FROM `matches` WHERE `id` = %d", $match['id']);
+			$res = $this->FillResultArray($query);
+			$matchToUpdate = $res[0];
+		
+			// update match in DB
+			$query = sprintf("UPDATE `matches` SET `f1` = %d, `b1` = %d, `f2` = %d, `b2` = %d, `goals1` = %d, `goals2` = %d WHERE id = %d",
 						$match['f1'],
 						$match['b1'],
 						$match['f2'],
 						$match['b2'],
 						$match['goals1'],
 						$match['goals2'],
-						$match['deltaelo'],
-						$match['timestamp'],
-						$match['season'],
 						$match['id']);
-			$result = $this->mysqli->query($query);
+			$this->mysqli->query($query);
+
+			// update elos of subsequent matches
+			$this->UpdateDeltaELOForMatches($matchToUpdate['season'], $matchToUpdate['timestamp']);
+		}
+
+		public function DeleteMatch($matchId)
+		{
+			// get data of match to be deleted
+			$query = sprintf("SELECT * FROM `matches` WHERE `id` = %d", $matchId);
+			$res = $this->FillResultArray($query);
+			$matchToDelete = $res[0];
+
+			// delete match from DB
+			$query = sprintf("DELETE FROM `matches` WHERE id = %d LIMIT 1",
+						$matchId);
+			$this->mysqli->query($query);
+
+			// update elos of subsequent matches
+			$this->UpdateDeltaELOForMatches($matchToDelete['season'], $matchToDelete['timestamp']);
 		}
 		
 		//************************ PRIVATE METHODS ***************************
 		
 		private function FillResultArray($query, $method = 'default')
 		{
+			$resultArray = array();
 			$stm = $this->mysqli->prepare($query) or trigger_error($this->mysqli->error);
 			$stm->execute() or trigger_error($this->mysqli->error);
 			$res = $stm->get_result();
 			$stm->close();
 			if ($method == 'index')
 			{
-				for ($this->resultArray = array(); $row = $res->fetch_assoc(); $this->resultArray[array_shift($row)] = $row);
+				for ($resultArray = array(); $row = $res->fetch_assoc(); $resultArray[array_shift($row)] = $row);
 			}
 			else
 			{
-				for ($this->resultArray = array(); $row = $res->fetch_assoc(); $this->resultArray[] = $row);
+				for ($resultArray = array(); $row = $res->fetch_assoc(); $resultArray[] = $row);
 			}
 			$res->free();
+			return $resultArray;
+		}
+		
+		private function UpdateDeltaELOForMatches($season, $fromTimestamp)
+		{
+			$settings = $this->GetSettings();
+			$players = $this->GetPlayers('index');
+			$matches = $this->GetMatchesForSeason($season);
+
+			// reset all players ELO to initial value
+			foreach ($players as &$p)
+			{
+				$p['elo'] = $settings['baseELO'];
+			}
+			// calc ELO for whole season
+			foreach ($matches as $m) {
+				$deltaelo = calcDeltaELO(
+					$players[$m['f1']]['elo'],
+					$players[$m['b1']]['elo'],
+					$players[$m['f2']]['elo'],
+					$players[$m['b2']]['elo'],
+					(int)$m['goals1'],
+					(int)$m['goals2']
+				);
+				if ($m['timestamp'] >= $fromTimestamp) {
+					$query = sprintf("UPDATE `matches` SET deltaelo = %f WHERE id = %d", $deltaelo, $m['id']);
+					$this->mysqli->query($query);
+				}
+				
+				$players[$m['f1']]['elo'] += $deltaelo;
+				$players[$m['b1']]['elo'] += $deltaelo;
+				$players[$m['f2']]['elo'] -= $deltaelo;
+				$players[$m['b2']]['elo'] -= $deltaelo;
+			}
 		}
 	}
 ?>

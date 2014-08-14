@@ -10,7 +10,7 @@ kickermanagerControllers.controller('PageCtrl', function ($scope, $location) {
 		{ link : '#/ranking', label : 'Tabelle', icon: 'trophy' },
 		{ link : '#/statistics', label : 'Statistik', icon: 'bar-chart-o' },
 		{ link : '#/playersetup', label : 'Spieler', icon: 'user' },
-		{ link : '#/configuration', label : 'Konfiguration', icon: 'cog' }
+		{ link : '#/administration', label : 'Administration', icon: 'cog' }
 	]; 
     
 	$scope.isCollapsed = true;
@@ -38,15 +38,17 @@ kickermanagerControllers.controller('PageCtrl', function ($scope, $location) {
 kickermanagerControllers.controller('RankingCtrl', function($scope, Ranking) {
 	$scope.$emit('setTitle', 'Tabelle');
 	$scope.ranking = Ranking.query();
+	$scope.players = null;
 	
 	$scope.hasPlayed = function(r) {
 		return r.total > 0;
 	}	
 });
 
-kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, History, Statistic, Player) {
+kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Settings, History, Statistic, Player) {
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
+	$scope.players = new Array();
 	
 	$scope.loadHistory = function() {
 		$scope.history = History.query({type:'today'});
@@ -56,18 +58,25 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter
 		$scope.dailyStats = Statistic.query({type:'daily', param:'today'});
 	}
 	
-	$http.get("api/settings").success(function(response) {
+	Settings.get().$promise.then(function(response) {
 		$scope.settings = response;
 		$scope.$emit('setTitle', 'Spiel eintragen - Saison ' + $scope.settings.currentSeason);
 		$scope.resetCtrl();
 	});
 
-	Player.query().$promise.then(function(response) {
-		$scope.players = $filter('active')(response);
-	});
+	$scope.loadPlayers = function() {
+		Player.query().$promise.then(function(response) {
+			// index array for faster access
+			for (var i in response) {
+				$scope.players[response[i].id] = response[i];
+			}
+			$scope.loadHistory();
+			$scope.loadDailyStats();
+		});
+	};
 
-	$scope.loadHistory();
-	$scope.loadDailyStats();
+
+	$scope.loadPlayers();
 
 	$scope.resetCtrl = function() {
 		$scope.submitting = false;
@@ -78,8 +87,12 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter
 		$scope.validated = false;
 	}
 	
-	$scope.hasDuplicate = function(pId) {
-		return $scope.selectedPlayer.indexOf(pId) != $scope.selectedPlayer.lastIndexOf(pId);
+	$scope.hasDuplicate = function(p) {
+		var c = 0;
+		for (var i in $scope.selectedPlayer) {
+			c = c + ($scope.selectedPlayer[i] === p ? 1 : 0);
+		}
+		return c > 1;
 	}
 	
 	$scope.validateForm = function(force) {
@@ -92,8 +105,8 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter
 			
 		for (var i = 0; i < $scope.selectedPlayer.length; ++i)
 		{
-			var pId = $scope.selectedPlayer[i];
-			$scope.invalidPlayer[i] = (pId == null || $scope.hasDuplicate(pId));
+			var p = $scope.selectedPlayer[i];
+			$scope.invalidPlayer[i] = (p === null || $scope.hasDuplicate(p));
 		}
 		var isMax0 = ($scope.goals[0] == $scope.settings.maxGoals);
 		var isMax1 = ($scope.goals[1] == $scope.settings.maxGoals);
@@ -109,14 +122,14 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter
 		// all valid
 		if ($scope.validateForm(true))
 		{
-			Match.save({
-				f1: $scope.selectedPlayer[0],
-				b1: $scope.selectedPlayer[1],
-				f2: $scope.selectedPlayer[2],
-				b2: $scope.selectedPlayer[3],
+			Match.post({
+				f1: $scope.selectedPlayer[0].id,
+				b1: $scope.selectedPlayer[1].id,
+				f2: $scope.selectedPlayer[2].id,
+				b2: $scope.selectedPlayer[3].id,
 				goals1: $scope.goals[0],
 				goals2: $scope.goals[1]
-			}).$promise.then(function(data) {
+			}).$promise.then(function(success) {
 				$scope.resetCtrl();
 				$scope.loadHistory();
 				$scope.loadDailyStats();
@@ -126,10 +139,13 @@ kickermanagerControllers.controller('MatchCtrl', function($scope, $http, $filter
 	};
 });
 
-kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Player, Statistic, $filter) {
+kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
 	$scope.$emit('setTitle', 'Statistik');
 
-	$scope.chartConfig = {
+	Settings.get().$promise.then(function(response) {
+		$scope.settings = response;
+
+		$scope.chartConfig = {
 			options: {
 				chart: { type: 'line' },
 				colors: ['#7cb5ec', '#f7a35c'],
@@ -155,7 +171,7 @@ kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Pl
 					plotLines: [{
 						color: 'red',
 						width: 2,
-						value: 1200.0
+						value: $scope.settings.baseELO
 					}]
 				},
 				plotOptions: {
@@ -168,7 +184,8 @@ kickermanagerControllers.controller('StatisticsCtrl', function($scope, $http, Pl
 						}
 			}
 		};
-	
+	});
+		
 	Player.query().$promise.then(function(response) {
 		$scope.players = $filter('active')(response);
 	});
@@ -234,6 +251,98 @@ kickermanagerControllers.controller('PlayerSetupCtrl', function($scope, Player) 
 	}
 });
 
-kickermanagerControllers.controller('ConfigurationCtrl', function($scope) {
-	$scope.$emit('setTitle', 'Configuration');
+kickermanagerControllers.controller('AdministrationCtrl', function($scope, $filter, Admin, Player, Match, History) {
+	$scope.$emit('setTitle', 'Administration');
+	
+	$scope.checked = false;
+	$scope.authed = false;
+	$scope.players = new Array();
+	$scope.date = new Date();
+	$scope.user = '';
+	$scope.pw = '';
+	
+	$scope.init = function() {
+		if ($scope.authed) {
+			$scope.loadPlayers();
+		}
+	};
+	
+	// first check if we are logged in
+	Admin.check().$promise.then(function(response) {
+		$scope.checked = true;
+		if (response.check) {
+			$scope.authed = true;
+			$scope.init();
+		}
+	});
+	
+	$scope.login = function() {
+		Admin.login({user: $scope.user, pw: $scope.pw}).$promise.then(
+			function (success) {
+				$scope.authed = true;
+				$scope.init();
+			},
+			function (error) {
+				$scope.user = '';
+				$scope.pw = '';
+				$scope.authed = false;
+			}
+		);
+	};
+
+	$scope.logout = function() {
+		Admin.logout({}).$promise.then(
+			function (success) {
+				$scope.user = '';
+				$scope.pw = '';
+				$scope.authed = false;
+			},
+			function (error) {
+				$scope.user = '';
+				$scope.pw = '';
+				$scope.authed = false;
+			}
+		);
+	};
+
+	$scope.loadPlayers = function() {
+		Player.query().$promise.then(function(response) {
+			// index array for faster access
+			for (var i in response) {
+				$scope.players[response[i].id] = response[i];
+			}
+			$scope.loadMatches();
+		});
+	};
+
+	$scope.loadMatches = function() {
+		History.query({type: 'date', param1: $filter('date')($scope.date, 'yyyy-MM-dd')}).$promise.then(function(response) {
+			$scope.history = response;
+		});
+	};
+	
+	$scope.prevDate = function() {
+		$scope.date.setDate($scope.date.getDate() - 1);
+		$scope.loadMatches();
+	}
+	
+	$scope.nextDate = function() {
+		$scope.date.setDate($scope.date.getDate() + 1);
+		$scope.loadMatches();
+	}
+
+	$scope.editMatch = function(match) {
+		console.log(match);
+	};
+
+	$scope.deleteMatch = function(match) {
+		Match.remove({matchId: match.id}).$promise.then(
+			function(success) {
+				$scope.loadMatches();
+			},
+			function (error) {
+				console.log(error);
+			}
+		);
+	};
 });

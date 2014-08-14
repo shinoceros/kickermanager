@@ -4,6 +4,8 @@
 
 	ini_set('max_execution_time', 900);
 	date_default_timezone_set("Europe/Berlin");
+
+	session_start();
 	
 	\Slim\Slim::registerAutoloader();
 
@@ -18,17 +20,39 @@
 		exit;
 	}
 	
+	function IsAuthed() {
+		return isset($_SESSION['authed']);
+	}
+	
 	// setup routes
 	
 	// GET routes
-	$app->get('/history/:type', function ($type) {
+	$app->get('/history/:type(/:param1(/:param2))', function ($type, $param1 = '', $param2 = '') {
 		try {
-			switch($type) {
-				case 'today':
-					$from = $to = date('Y-m-d');
-					break;
-				default:
-					throw new Exception("Unknown type: ".$type);
+			$regexDate = '/^\\d{4}-\\d{2}-\\d{2}$/';
+			$valid = false;
+			if ($type == 'today') {
+				$from = $to = date('Y-m-d');
+				$valid = true;
+			}
+			else if ($type == 'date') {
+				if (preg_match($regexDate, $param1) && $param2 == '') {
+					$from = $to = $param1;
+					$valid = true;
+				}
+			}
+			else if ($type == 'range') {
+				if (preg_match($regexDate, $param1) && preg_match($regexDate, $param2)) {
+					if ($param1 < $param2) {
+						$from = $param1;
+						$to = $param2;
+						$valid = true;
+					}
+				}
+			}
+
+			if (!$valid) {
+					throw new Exception("Invalid request");
 			}
 			$db = DB::GetInstance();
 			$history = $db->GetHistory($from, $to);
@@ -80,7 +104,7 @@
 		} catch(Exception $e) {
 			HandleError($e);
 		}
-	})->conditions(array('season' => '-?\d'));
+	})->conditions(array('season' => '-?\d+'));
 	
 	// get all players
 	$app->get('/player', function () {
@@ -101,6 +125,11 @@
 		} catch(Exception $e) {
 			HandleError($e);
 		}
+	});
+	
+	$app->get('/admin/check', function() {
+		$res = array('check' => IsAuthed());
+		echo json_encode_utf8($res);
 	});
 	
 	$app->get('/', function() use ($app) {
@@ -151,6 +180,27 @@
 		}
 	});
 
+	// login / logout
+	$app->post('/admin/:action', function($action) use ($app) {
+		$request = $app->request();
+		$cred = json_decode($request->getBody(), true);
+		switch($action) {
+			case 'login':
+				if (isset($cred['user']) && isset($cred['pw'])) {
+					if ($cred['user'] == 'kicker' && $cred['pw'] == 'supersteinfaust') {
+						$_SESSION['authed'] = true;
+					}
+				}
+				break;
+			case 'logout':
+				unset($_SESSION['authed']);
+				break;
+		}
+		if (!IsAuthed()) {
+			$app->halt(401);
+		}
+	})->conditions(array('action' => '(login|logout)'));
+	
 	// PUT ROUTES
 	// update player
 	$app->put('/player', function () use ($app) {
@@ -165,6 +215,33 @@
 		}
 	});
 
+	// update match
+	$app->put('/match', function() use ($app) {
+		if (!IsAuthed()) {
+			$app->halt(401);
+		}
+		try {
+			$request = $app->request();
+			$match = json_decode($request->getBody(), true);
+			$db = DB::GetInstance();
+			$db->UpdateMatch($match);
+		} catch(Exception $e) {
+			HandleError($e);
+		}
+	});
+
+	// DELETE ROUTES
+	$app->delete('/match/:matchId', function($matchId) {
+		if (!IsAuthed()) {
+			$app->halt(401);
+		}
+		try {
+			$db = DB::GetInstance();
+			$db->DeleteMatch($matchId);
+		} catch(Exception $e) {
+			HandleError($e);
+		}
+	});
 
 	// run
 	$app->run();

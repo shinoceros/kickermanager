@@ -10,6 +10,20 @@ var kickermanagerApp = angular.module('kickermanagerApp', [
 	'highcharts-ng'
 ]);
 
+kickermanagerApp.directive('ngReallyClick', [function() {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs) {
+			element.bind('click', function() {
+				var message = attrs.ngReallyMessage;
+				if (message && confirm(message)) {
+					scope.$apply(attrs.ngReallyClick);
+				}
+			});
+		}
+	}
+}]);
+
 kickermanagerApp.config(['$routeProvider', 
   function($routeProvider) {
     $routeProvider.
@@ -17,6 +31,6 @@ kickermanagerApp.config(['$routeProvider',
       when('/ranking', {templateUrl: 'partials/ranking.html', controller: 'RankingCtrl'}).
       when('/statistics', {templateUrl: 'partials/statistics.html', controller: 'StatisticsCtrl'}).
       when('/playersetup', {templateUrl: 'partials/playersetup.html', controller: 'PlayerSetupCtrl'}).
-      when('/configuration', {templateUrl: 'partials/configuration.html', controller: 'ConfigurationCtrl'}).
+      when('/administration', {templateUrl: 'partials/configuration.html', controller: 'AdministrationCtrl'}).
       otherwise({redirectTo: '/match'});
 }]);
