@@ -1,1 +1,41 @@
-TODO Player Setup
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-xs-12 col-sd-12 col-lg-12">
+			<label for="newplayer">Neuer Spieler</label>
+			<div class="input-group">
+				<input type="text" class="form-control" id="newplayer" ng-model="newplayer">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" ng-click="addPlayer()">Eintragen</button>
+				</span>
+			</div>
+		</div>
+	</div>
+	<br/><br/>
+	<div class="row">
+		<div class="col-xs-12 col-sd-12 col-lg-12" ng-class="{'text-danger': result.error, 'text-success': !result.error}">
+			<div class="alert" ng-show="result.text.length" ng-class="{'alert-danger': result.error, 'alert-success': !result.error}">
+				<i class="fa text-right" ng-class="{'fa-exclamation-triangle': result.error, 'fa-check': !result.error}"></i> {{result.text}}
+			</div>
+		</div>
+	</div>
+	<br/><br/>
+	<div class="row">
+		<div class="col-xs-12 col-sd-12 col-lg-12">
+			<label for="editplayer">Spieler bearbeiten</label>
+		<form class="form-inline">
+			<div class="form-group">
+				<div class="input-group">
+					<select ng-model="selectedPlayer" ng-disabled="!players.length || updating" ng-options="p as p.name for p in players" class="form-control" id="editplayer">
+						<option value="">-- ausw&auml;hlen --</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="btn-group">
+					<label class="btn btn-primary" ng-disabled="updating || selectedPlayer == null" ng-change="updatePlayer()" ng-model="selectedPlayer.active" btn-radio="1">Aktiv</label>
+					<label class="btn btn-primary" ng-disabled="updating || selectedPlayer == null" ng-change="updatePlayer()" ng-model="selectedPlayer.active" btn-radio="0">Inaktiv</label>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>

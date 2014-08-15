@@ -5,13 +5,13 @@
 			<div class="form-group" ng-class="{'has-error': invalidPlayer[0]}">
 				<br/>
 				<i class="fa fa-bolt"></i> <label class="control-label" for="f1">Angreifer 1</label>
-				<select ng-change="validateForm(false)" ng-model="selectedPlayer[0]" ng-disabled="!players.length" name="f1" ng-options="p.id as p.name for p in players" class="form-control" id="f1">
+				<select ng-change="validateForm(false)" ng-model="selectedPlayer[0]" ng-disabled="!players.length" ng-options="p as p.name for p in (players | active | orderBy: 'name')" class="form-control" id="f1">
 					<option value="">-- ausw&auml;hlen --</option>
 				</select>
 			</div>
 			<div class="form-group" ng-class="{'has-error': invalidPlayer[1]}">
 				<i class="fa fa-shield"></i> <label class="control-label" for="b1">Verteidiger 1</label>
-				<select ng-change="validateForm(false)" ng-model="selectedPlayer[1]" ng-disabled="!players.length" name="b1" ng-options="p.id as p.name for p in players" class="form-control" id="b1">
+				<select ng-change="validateForm(false)" ng-model="selectedPlayer[1]" ng-disabled="!players.length" ng-options="p as p.name for p in (players | active | orderBy: 'name')" class="form-control" id="b1">
 					<option value="">-- ausw&auml;hlen --</option>
 				</select>
 			</div>
@@ -27,14 +27,14 @@
 			<div class="form-group" ng-class="{'has-error': invalidPlayer[2]}">
 				<br/>
 				<i class="fa fa-bolt"></i> <label class="control-label" for="f2">Angreifer 2</label>
-				<select ng-change="validateForm(false)" ng-model="selectedPlayer[2]" ng-disabled="!players.length" name="f2" ng-options="p.id as p.name for p in players" class="form-control" id="f2">
+				<select ng-change="validateForm(false)" ng-model="selectedPlayer[2]" ng-disabled="!players.length" ng-options="p as p.name for p in (players | active | orderBy: 'name')" class="form-control" id="f2">
 					<option value="">-- ausw&auml;hlen --</option>
 				</select>
 
 			</div>
 			<div class="form-group" ng-class="{'has-error': invalidPlayer[3]}">
 				<i class="fa fa-shield"></i> <label class="control-label" for="b2">Verteidiger 2</label>
-				<select ng-change="validateForm(false)" ng-model="selectedPlayer[3]" ng-disabled="!players.length" name="b2" ng-options="p.id as p.name for p in players" class="form-control" id="b2">				
+				<select ng-change="validateForm(false)" ng-model="selectedPlayer[3]" ng-disabled="!players.length" ng-options="p as p.name for p in (players | active | orderBy: 'name')" class="form-control" id="b2">				
 					<option value="">-- ausw&auml;hlen --</option>
 				</select>
 
@@ -76,7 +76,7 @@
 			<tr
 				ng-repeat="h in history | orderBy: '-timestamp'">
 				<td>{{h.timestamp}}</td>
-				<td>{{h.f1}}<br>{{h.b1}}</td>
+				<td>{{players[h.f1].name}}<br>{{players[h.b1].name}}</td>
 				<td class="text-center"><strong>{{h.goals1}} : {{h.goals2}}</strong>
 					<p>
 						<i class="fa" ng-class="{'won fa-caret-up': h.deltaelo > 0, 'lost fa-caret-down': h.deltaelo < 0}"></i>
@@ -84,7 +84,7 @@
 						<i class="fa" ng-class="{'lost fa-caret-down': h.deltaelo > 0, 'won fa-caret-up': h.deltaelo < 0}"></i>
 					</p>
 				</td>
-				<td>{{h.f2}}<br>{{h.b2}}</td>
+				<td>{{players[h.f2].name}}<br>{{players[h.b2].name}}</td>
 			</tr>
 		</table>
 	</div>
@@ -102,7 +102,7 @@
 			<tr
 				ng-repeat="d in dailyStats | orderBy: '-deltaelo'">
 				<td>{{$index + 1}}</td>
-				<td>{{d.name}}</td>
+				<td>{{players[d.id].name}}</td>
 				<td class='text-right'>{{d.deltaelo | float: 1}}</td>
 				<td><i class="fa" ng-class="{'lost fa-caret-down': d.deltaelo < 0, 'won fa-caret-up': d.deltaelo > 0}"></i></td>
 				<td>{{d.wins / d.total | percent: 1}}</td>

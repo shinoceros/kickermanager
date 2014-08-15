@@ -1,21 +1,41 @@
-var kickermanagerServices = angular.module('kickermanagerServices', ['ngResource']);
+var kmServices = angular.module('kmServices', ['ngResource']);
 
-kickermanagerServices.factory('Ranking', function($resource) {
+kmServices.factory('Settings', function($resource) {
+	return $resource('api/settings');
+});
+
+kmServices.factory('Ranking', function($resource) {
 	return $resource('api/ranking?nocache=' + (new Date()).getTime());
 });
 
-kickermanagerServices.factory('Players', function($resource) {
-	return $resource('api/players?nocache=' + (new Date()).getTime());
+kmServices.factory('Player', function($resource) {
+	return $resource('api/player/:playerId', {}, {
+		query:	{method:'GET', params: {playerId: ''}, isArray: true},
+		post:	{method:'POST'},
+		update:	{method:'PUT', params: {playerId: '@playerId'}}
+	});
 });
 
-kickermanagerServices.factory('Match', function($resource) {
-	return $resource('api/match');
+kmServices.factory('Match', function($resource) {
+	return $resource('api/match/:matchId', {}, {
+		post:	{method:'POST'},
+		update:	{method:'PUT', params: {matchId: '@matchId'}},
+		remove:	{method:'DELETE', params: {matchId: '@matchId'}}
+	});
 });
 
-kickermanagerServices.factory('History', function($resource) {
-	return $resource('api/history/:type?nocache=' + (new Date()).getTime());
+kmServices.factory('History', function($resource) {
+	return $resource('api/history/:type/:param1/:param2');
 });
 
-kickermanagerServices.factory('Stats', function($resource) {
+kmServices.factory('Statistic', function($resource) {
 	return $resource('api/stats/:type/:param?nocache=' + (new Date()).getTime());
+});
+
+kmServices.factory('Admin', function($resource) {
+	return $resource('api/admin/:action', {}, {
+		login:	{method:'POST', params: {action: 'login'}},
+		logout:	{method:'POST', params: {action: 'logout'}},
+		check:	{method:'GET', params: {action: 'check'}}
+	});
 });

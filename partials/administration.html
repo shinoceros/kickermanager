@@ -1,0 +1,64 @@
+<div ng-show="!authed && checked" class="container-fluid">
+	<form>
+		<div class="form-group">
+			<label for="user">Benutzer</label>
+			<input type="text" ng-model="user" class="form-control" id="user">
+		</div>
+		<div class="form-group">
+			<label for="pw">Passwort</label>
+			<input type="password" ng-model="pw" class="form-control" id="pw">
+		</div>
+		<div class="form-group">
+			<button type="button" class="btn btn-primary" ng-click="login()">Login</button>
+		</div>
+	</form>
+</div>
+
+<div ng-show="authed" class="container">
+	<div class="row">
+		<div class="col-xs-12 text-left">
+			<button type="button" class="btn btn-primary" ng-click="logout()">Logout</button>
+		</div>
+	</div>
+	<div class="row">
+		<br/>
+		<div class="col-xs-2 text-left">
+			<button type="button" class="btn btn-primary" ng-click="prevDate()" ng-disabled="!history"><i class="fa fa-chevron-left"></i></button>
+		</div>
+		<div class="col-xs-8 text-center">
+			<h4>Spiele ({{date | date: 'yyyy-MM-dd'}})</h4>
+		</div>
+		<div class="col-xs-2 text-right">
+			<button type="button" class="btn btn-primary" ng-click="nextDate()" ng-disabled="!history"><i class="fa fa-chevron-right"></i></button>
+		</div>
+	</div>
+	<div class="row">
+		<br/>
+		<table class="table table-striped table-condensed">
+			<tr>
+				<th>Datum</th>
+				<th>Team1</th>
+				<th class="text-center">Ergebnis</th>
+				<th>Team2</th>
+				<th>Optionen</th>
+			</tr>
+			<tr
+				ng-repeat="h in history | orderBy: '-timestamp'">
+				<td>{{h.timestamp}}</td>
+				<td>{{players[h.f1].name}}<br>{{players[h.b1].name}}</td>
+				<td class="text-center"><strong>{{h.goals1}} : {{h.goals2}}</strong>
+					<p>
+						<i class="fa" ng-class="{'won fa-caret-up': h.deltaelo > 0, 'lost fa-caret-down': h.deltaelo < 0}"></i>
+						{{h.deltaelo | abs | float: 1}}
+						<i class="fa" ng-class="{'lost fa-caret-down': h.deltaelo > 0, 'won fa-caret-up': h.deltaelo < 0}"></i>
+					</p>
+				</td>
+				<td>{{players[h.f2].name}}<br>{{players[h.b2].name}}</td>
+				<td>
+					<!--button type="button" class="btn btn-primary" ng-click="editMatch(h)"><i class="fa fa-pencil"></i></button-->
+					<button type="button" class="btn btn-danger" ng-really-message="Sicher?" ng-really-click="deleteMatch(h)"><i class="fa fa-times red"></i></button>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
