@@ -19,10 +19,6 @@
 	}
 
 	// db setup
-	mysqli_query($db, "DROP TABLE IF EXISTS `matches` ;");
-	mysqli_query($db, "DROP TABLE IF EXISTS `players` ;");
-	mysqli_query($db, "DROP TABLE IF EXISTS `settings` ;");
-
 	mysqli_query($db, "CREATE TABLE `players` (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`name` varchar(50) COLLATE latin1_german1_ci NOT NULL,
