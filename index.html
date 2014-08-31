@@ -35,7 +35,7 @@
 				</div>
 				<div collapse="isCollapsed" class="navbar-collapse">
 					<ul class="nav navbar-nav">
-						<li ng-class="tabClass(tab)" ng-repeat="tab in tabs"><a ui-sref="{{tab.link}}" ng-click="setSelectedTab(tab)"><i class="fa fa-{{tab.icon}}"></i> {{tab.label}}</a></li>			
+						<li ui-sref-active="active" ng-repeat="tab in tabs"><a ui-sref="{{tab.link}}" ng-click="collapse()"><i class="fa fa-{{tab.icon}}"></i> {{tab.label}}</a></li>			
 					</ul>
 				</div><!-- /.nav-collapse -->
 			</div><!-- /.container-fluid -->

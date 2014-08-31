@@ -4,7 +4,7 @@
 
 var kmControllers = angular.module('kmControllers', []);
 
-kmControllers.controller('PageCtrl', function ($scope, $location) {
+kmControllers.controller('PageCtrl', function ($scope) {
 	$scope.tabs = [
 		{ link : 'match', label : 'Spiel', icon: 'edit' },
 		{ link : 'ranking', label : 'Tabelle', icon: 'trophy' },
@@ -15,24 +15,14 @@ kmControllers.controller('PageCtrl', function ($scope, $location) {
     
 	$scope.isCollapsed = true;
 	
+	$scope.collapse = function() {
+		$scope.isCollapsed = true;
+	}
+	
 	$scope.$on('setTitle', function(event, title) {
 		event.stopPropagation();
 		$scope.title = title;
 	});
-	
-	$scope.selectedTab = $scope.tabs[0];    
-	$scope.setSelectedTab = function(tab) {
-		$scope.selectedTab = tab;
-		$scope.isCollapsed = true;
-	}
-  
-	$scope.tabClass = function(tab) {
-		if ($scope.selectedTab == tab) {
-			return "active";
-		} else {
-			return "";
-		}
-	}
 });
 
 kmControllers.controller('RankingCtrl', function($scope, Ranking) {
@@ -60,7 +50,6 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 	
 	Settings.get().$promise.then(function(response) {
 		$scope.settings = response;
-		$scope.$emit('setTitle', 'Spiel eintragen - Saison ' + $scope.settings.currentSeason);
 		$scope.resetCtrl();
 	});
 
