@@ -5,7 +5,7 @@
 	include('api/dbconfig.php');
 	include('api/functions.php');
 	
-	class db_settings
+	class DatacaseSettings
 	{
 	
 	var $db;
@@ -45,6 +45,38 @@
 	    	$result->close();
 		
 		return ($total_num_rows == 0);
+	}
+	
+	// ========================================================================
+	
+	function getCurrentVersion()
+	{
+		$currentVersion = 1;
+		
+		$result = $this->db->query("SELECT current FROM version", MYSQLI_USE_RESULT);
+		
+	    	if ($field = $result->fetch_object())
+	    	{			
+			$currentVersion = $field->current;
+	    	}
+		
+	    	$result->close();
+		
+		return $currentVersion;
+	}
+	
+	// ========================================================================
+	
+	function update($targetVersion)
+	{
+		if ($this->getCurrentVersion() < $targetVersion)
+		{
+			//TODO: implement update scenario
+		}
+		else
+		{
+			print "<pre><b>UPDATE DB:</b> Database is up to date!</pre>";
+		}
 	}
 	
 	// ========================================================================
@@ -105,7 +137,7 @@
 
 		if ($this->addTableVersion)
 		{
-		        echo "install started ...";
+		        echo "<br /><b>Setup started</b><br /><ul>";
 		   	// db setup	
 			if (!$this->db->query("CREATE TABLE IF NOT EXISTS `version` ( `current` int(11) NOT NULL ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_german1_ci"))
 			{
@@ -117,6 +149,10 @@
 			{
 				$this->db->close();
 				die ("INSERT version failed" . mysql_error());
+			}
+			else
+			{
+				echo "<li>version done</li>";
 			}
 		}
 	
@@ -131,6 +167,10 @@
 			{
 				$this->db->close();
 				die ("Query players failed" . mysql_error());
+			}
+			else
+			{
+				echo "<li>players done</li>";
 			}
 		}
 	
@@ -161,6 +201,10 @@
 				$this->db->close();
 				die ("Query matches failed" . mysql_error());
 			}
+			else
+			{
+				echo "<li>matches done</li>";
+			}
 		}
 	
 		if ($this->addTableSettings)
@@ -184,15 +228,18 @@
 				$this->db->close();
 				die ("INSERT failed" . mysql_error());
 			}
+			else
+			{
+				echo "<li>settings done</li>";
+			}
 		}
-	
-		echo " done\n";
-		echo "Script executed in ".sprintf("%.1f", (microtime(true) - $startTime))." seconds.";
-		echo "</pre>";
+
+		echo "</ul><b>Setup finished in " . sprintf("%.1f", (microtime(true) - $startTime))." seconds." . "</b><br />";		
 	}
 }
-	$db_settings = new db_settings();
+	$db_settings = new DatacaseSettings();
 	$db_settings->setup();
+	$db_settings->update(1);
 ?>
 </body>
 </html>
