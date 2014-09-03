@@ -1,6 +1,27 @@
 <html>
 <body>
 <?php
+	/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+	
+	/**
+	 * This file is used to setup or update the database by usig the database configuration.
+	 *
+	 * TODO: Implement functions for specific update scenarios.
+	 * This software is distributed under the terms of the GNU General Public License.
+	 *
+	 * PHP version 5
+	 *
+	 * LICENSE: Free Software Foundation’s GNU General Public License
+	 *
+	 * @category   Database
+	 * @package    N/A
+	 * @author     Campus77
+	 * @author     Shinoceros
+	 * @copyright  2014
+	 * @license    http://www.gnu.org/licenses/gpl.txt
+	 * @version    GIT: $Id$
+	 */
+ 
 	ini_set('max_execution_time', 900);
 	include('api/dbconfig.php');
 	include('api/functions.php');
