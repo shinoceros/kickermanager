@@ -26,7 +26,7 @@
 	include('api/dbconfig.php');
 	include('api/functions.php');
 	
-	class DatacaseSettings
+	class DatabaseSettings
 	{
 	
 	var $db = NULL;
@@ -292,7 +292,7 @@
 		echo "</ul><b>Setup finished in " . sprintf("%.1f", (microtime(true) - $startTime))." seconds." . "</b><br />";		
 	}
 }
-	$db_settings = new DatacaseSettings();
+	$db_settings = new DatabaseSettings();
 	$db_settings->setup();
 	$db_settings->update(1);
 ?>
