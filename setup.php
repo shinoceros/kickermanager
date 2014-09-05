@@ -29,7 +29,7 @@
 	class DatacaseSettings
 	{
 	
-	var $db;
+	var $db = NULL;
 	var $baseELO = 1200.0;
 	var $maxGoals = 6;
 
@@ -43,28 +43,48 @@
 	function __construct()
 	{
 	}
+
+	// ========================================================================
+
+	function exitOnError($errMsg)
+	{
+		if ($this->db)
+		{
+			echo "\n<pre><b>" . $errMsg . $this->db->error . "<b></pre>\n";
+			$this->db->close();
+			$this->db = NULL;
+		}
+		else
+		{
+			echo "\n<pre><b>" . $errMsg . "<b></pre>\n";
+		}
+
+		die ("script terminated ;-(");
+	}
 	
 	// ========================================================================
 	
 	function __destruct()
 	{
-		$this->db->close();
+		if ($this->db)
+		{
+			$this->db->close();
+		}
 	}
 	
 	// ========================================================================
 	
 	function checkTable($tableName) 
 	{
-  		$result = $this->db->query("SHOW TABLES LIKE '" . $tableName . "'");
-	    	if (!$result)
-	    	{
-			$this->db->close();
-	        	die ("SHOW " . $tableName . " failed : " . mysql_error());
-	    	}
-		
-	    	$total_num_rows = $result->num_rows;
-	    	$result->close();
-		
+		$result = $this->db->query("SHOW TABLES LIKE '" . $tableName . "'");
+	    if (!$result)
+	    {
+			$this->exitOnError("SHOW " . $tableName . " failed: ");
+	    }
+
+		$total_num_rows = $result->num_rows;
+	    $result->close();
+
 		return ($total_num_rows == 0);
 	}
 	
@@ -73,16 +93,25 @@
 	function getCurrentVersion()
 	{
 		$currentVersion = 1;
-		
+
 		$result = $this->db->query("SELECT current FROM version", MYSQLI_USE_RESULT);
-		
-	    	if ($field = $result->fetch_object())
-	    	{			
+
+		if (!$result)
+		{
+			$this->exitOnError("SELECT - FROM failed: ");
+		}
+
+		if ($field = $result->fetch_object())
+	    {
 			$currentVersion = $field->current;
-	    	}
-		
-	    	$result->close();
-		
+	    }
+	    else
+	    {
+			$this->exitOnError("fetch_object failed: ");
+		}
+
+	    $result->close();
+
 		return $currentVersion;
 	}
 	
@@ -106,11 +135,24 @@
 	{
 		$startTime = microtime(true); 
 		echo "<pre>";
-		// db init // DBConfig::$db, 3306
-		$this->db = mysqli_connect(DBConfig::$host, DBConfig::$user, DBConfig::$password);
-		if (mysqli_connect_error())
+		// db init
+		try
 		{
-			die ("MySQL connection error"  . mysql_error());
+			$this->db = @new mysqli(DBConfig::$host, DBConfig::$user, DBConfig::$password);
+
+			if ($cerr = $this->db->connect_errno)
+			{
+				$this->db = NULL;
+				$this->exitOnError("mysqli connect failed: " . $cerr);
+			}
+			else
+			{
+				echo "Database connected.\n";
+			}
+		}
+		catch (Exception $e)
+		{
+    		$this->exitOnError("Exception abgefangen: " . $e->getMessage());
 		}
 	
 		// Make DBConfig::$db the current database if possible
@@ -119,26 +161,24 @@
 		// test is databse as specified in db config exists. If not, create db.
 		if (!$existsDB) 
 		{
-			echo "DB " . DBConfig::$db . " is not present\n";
-		    	// If we couldn't, then it either doesn't exist, or we can't see it.
-		    	$sql = 'CREATE DATABASE ' . DBConfig::$db;
+			echo "DB '" . DBConfig::$db . "' is not present\n";
+		    // If we couldn't, then it either doesn't exist, or we can't see it.
+		    $sql = 'CREATE DATABASE ' . DBConfig::$db;
 
-		    	$res = $this->db->query($sql);
-		    	if (!$res) 
-		    	{
-				echo "CREATE DATABASE FAILED\n";
-		    		$this->db->close();
-		        	die ('Error creating database: ' . mysql_error());
-		    	}
+		    $res = $this->db->query($sql);
+		    if (!$res) 
+		    {
+				$this->exitOnError("CREATE DATABASE failed: ");
+		    }
 			else
 			{
 				echo "CREATE DATABASE OK\n";
 			}
-	    
-		    	if (!$this->db->select_db(DBConfig::$db))
-		    	{
-				echo "SELECT DATABASE FAILED\n";
-		    	}
+
+	    	if (!$this->db->select_db(DBConfig::$db))
+		    {
+				$this->exitOnError("SELECT DATABASE failed: ");
+		    }
 			else
 			{
 				$this->addTableVersion = true;
@@ -158,27 +198,25 @@
 
 		if ($this->addTableVersion)
 		{
-		        echo "<br /><b>Setup started</b><br /><ul>";
+		    echo "<br /><b>Setup started</b><br /><ul>";
 		   	// db setup	
 			if (!$this->db->query("CREATE TABLE IF NOT EXISTS `version` ( `current` int(11) NOT NULL ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_german1_ci"))
 			{
-				$this->db->close();
-				die ("CREATE version failed" . mysql_error());
+				$this->exitOnError("CREATE version failed: ");
 			}
-			
+
 			if (!$this->db->query("INSERT INTO `version` (`current`) VALUES (1);"))
 			{
-				$this->db->close();
-				die ("INSERT version failed" . mysql_error());
+				$this->exitOnError("INSERT version failed: ");
 			}
 			else
 			{
 				echo "<li>version done</li>";
 			}
 		}
-	
+
 		if ($this->addTablePlayers)
-		{	
+		{
 			if (!$this->db->query("CREATE TABLE IF NOT EXISTS `players` (
 				`id` int(11) NOT NULL AUTO_INCREMENT,
 				`name` varchar(50) COLLATE latin1_german1_ci NOT NULL,
@@ -186,8 +224,7 @@
 				PRIMARY KEY (`id`)
 				) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_german1_ci AUTO_INCREMENT=1 ;"))
 			{
-				$this->db->close();
-				die ("Query players failed" . mysql_error());
+				$this->exitOnError("Query players failed: ");
 			}
 			else
 			{
@@ -219,8 +256,7 @@
 			  FOREIGN KEY (b2) REFERENCES players(id)
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_german1_ci AUTO_INCREMENT=1 ;"))
 			{
-				$this->db->close();
-				die ("Query matches failed" . mysql_error());
+				$this->exitOnError("Query matches failed: ");
 			}
 			else
 			{
@@ -237,8 +273,7 @@
 			  PRIMARY KEY (`key`)
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_german1_ci;"))
 			{
-				$this->db->close();
-				die ("Query settings failed" . mysql_error());
+				$this->exitOnError("Query settings failed: ");
 			}
 	
 			if (!$this->db->query("INSERT INTO `settings` (`key`, `type`, `value`) VALUES
@@ -246,8 +281,7 @@
 			  ('baseELO', 'int', '$this->baseELO'),
 			  ('maxGoals', 'int', '$this->maxGoals');"))
 			{
-				$this->db->close();
-				die ("INSERT failed" . mysql_error());
+				$this->exitOnError("INSERT settings failed: ");
 			}
 			else
 			{
