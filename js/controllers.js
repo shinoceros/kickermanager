@@ -126,6 +126,18 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 		}
 		$scope.submitting = false;
 	};
+	
+	$scope.style = function(value) {
+		//TODO: get current user name
+		var loggedOnUser = 'Marshall';
+		if (value == loggedOnUser) {
+			return { "background-color": 'LemonChiffon' };
+        }
+        else
+        {
+			return { };
+        }
+	};
 });
 
 kmControllers.controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
