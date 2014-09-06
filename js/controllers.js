@@ -47,7 +47,7 @@ kmControllers.controller('RankingCtrl', function($scope, Ranking) {
 
 	$scope.style = function(value) {
 		//TODO: get current user name
-		var loggedOnUser = 'Marshall';
+		var loggedOnUser = 'XXXX';
 		if (value == loggedOnUser) {
 			return { "background-color": 'LemonChiffon' };
         }
@@ -174,7 +174,7 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 	
 	$scope.style = function(value) {
 		//TODO: get current user name
-		var loggedOnUser = 'Marshall';
+		var loggedOnUser = 'XXXX';
 		if (value == loggedOnUser) {
 			return { "background-color": 'LemonChiffon' };
         }
