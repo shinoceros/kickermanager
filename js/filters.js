@@ -32,5 +32,29 @@ kmFilters.filter('active', function() {
 			}
 		}
 		return filtered;
-	};
+	}
+});
+
+kmFilters.filter('stats', function($filter) {
+	return function(input, eloOffset, eloMode) {
+		if (eloMode == 'week') {
+			if (eloOffset == 0) {
+				return 'diese Woche';
+			}
+			if (eloOffset == -1) {
+				return 'letzte Woche';
+			}
+			return 'vor ' + (-eloOffset) + ' Wochen';
+		}
+		if (eloMode == 'day') {
+			if (eloOffset == 0) {
+				return 'heute';
+			}
+			if (eloOffset == -1) {
+				return 'gestern';
+			}
+			return $filter('date')(input, 'yyyy-MM-dd');
+		}
+		return input;
+	}
 });

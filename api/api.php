@@ -66,9 +66,17 @@
 		try {
 			$db = DB::GetInstance();
 			switch($type) {
-				case 'daily':
+				case 'day':
 					if ($param == 'today') $param = date('Y-m-d');
-					$stats = $db->GetStatsDaily($param);
+					$stats = $db->GetStatsForRange($param, $param);
+					break;
+				case 'week':
+					// determine Mon and Sun of current date
+					$date = date_create_from_format('Y-m-d', $param);
+					$dow = $date->format('N');
+					$mon = $date->modify((1 - $dow).' day')->format('Y-m-d');
+					$sun = $date->modify('+6 day')->format('Y-m-d');
+					$stats = $db->GetStatsForRange($mon, $sun);
 					break;
 				case 'elotrend':
 					$playersDB = $db->GetPlayers('index');

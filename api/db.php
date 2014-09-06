@@ -140,7 +140,7 @@
 			return $resultArray;
 		}
 		
-		public function GetStatsDaily($date)
+		public function GetStatsForRange($from, $to)
 		{
 			$query = sprintf(
 			"SELECT
@@ -159,9 +159,9 @@
 				UNION
 				SELECT b2 AS id, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, timestamp FROM matches
 				) AS m ON p.id = m.id
-				WHERE DATE(timestamp) = '%s'
-				GROUP BY (p.id)"
-			, $date);
+				WHERE DATE(timestamp) >= '%s' AND DATE(timestamp) <= '%s'
+				GROUP BY (p.id)",
+			$from, $to);
 			
 			return $this->FillResultArray($query);
 		}

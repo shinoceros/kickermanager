@@ -51,19 +51,42 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
+
+	$scope.eloMode = 'day';
+	$scope.eloOffset = 0;
+	$scope.dateFormatted = "";
+	
+	$scope.getDate = function() {
+		var d = new Date();
+		var factor = ($scope.eloMode == 'week' ? 7 : 1);
+		d.setDate(d.getDate() + $scope.eloOffset * factor);
+		return d;
+	}
 	
 	$scope.loadHistory = function() {
 		$scope.history = History.query({type:'today'});
 	}
 
-	$scope.loadDailyStats = function() {
-		$scope.dailyStats = Statistic.query({type:'daily', param:'today'});
+	$scope.loadStats = function() {
+		var d = $scope.getDate();
+		$scope.dateFormatted = $filter('stats')(d, $scope.eloOffset, $scope.eloMode);
+		$scope.stats = Statistic.query({type: $scope.eloMode, param: $filter('date')(d, 'yyyy-MM-dd')});
 	}
 	
 	Settings.get().$promise.then(function(response) {
 		$scope.settings = response;
 		$scope.resetCtrl();
 	});
+
+	$scope.onChangeEloMode = function() {
+		$scope.eloOffset = 0;
+		$scope.loadStats();
+	}
+	
+	$scope.changeDate = function(offset) {
+		$scope.eloOffset += offset;
+		$scope.loadStats();
+	}
 
 	$scope.loadPlayers = function() {
 		Player.query().$promise.then(function(response) {
@@ -72,10 +95,9 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 				$scope.players[response[i].id] = response[i];
 			}
 			$scope.loadHistory();
-			$scope.loadDailyStats();
+			$scope.loadStats();
 		});
-	};
-
+	}
 
 	$scope.loadPlayers();
 
@@ -133,7 +155,7 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 			}).$promise.then(function(success) {
 				$scope.resetCtrl();
 				$scope.loadHistory();
-				$scope.loadDailyStats();
+				$scope.loadStats();
 			});
 		}
 		$scope.submitting = false;
