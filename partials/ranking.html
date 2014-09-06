@@ -1,3 +1,15 @@
+<div class="container-fluid">
+	<div class="row">
+		<div class="form-group text-center">
+			<div class="btn-group">
+				<label class="btn btn-primary" ng-change="onChangeRankingMode()" ng-model="rankingMode" btn-radio="'total'"><i class="fa fa-rocket"></i><br>Gesamt</label>
+				<label class="btn btn-primary" ng-change="onChangeRankingMode()" ng-model="rankingMode" btn-radio="'attacker'"><i class="fa fa-flash"></i><br>Angreifer</label>
+				<label class="btn btn-primary" ng-change="onChangeRankingMode()" ng-model="rankingMode" btn-radio="'defender'"><i class="fa fa-shield"></i><br>Verteidiger</label>
+			</div>
+		</div>
+	</div>
+</div>
+
 <table class="table table-striped table-condensed">
 	<tr>
 		<th>#</th>

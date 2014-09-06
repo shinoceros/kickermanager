@@ -27,7 +27,18 @@ kmControllers.controller('PageCtrl', function ($scope) {
 
 kmControllers.controller('RankingCtrl', function($scope, Ranking) {
 	$scope.$emit('setTitle', 'Tabelle');
-	$scope.ranking = Ranking.query();
+	$scope.rankingMode = 'total';
+	
+	$scope.loadRanking = function() {
+		$scope.ranking = Ranking.query({mode: $scope.rankingMode});
+	}
+
+	$scope.loadRanking();
+	
+	$scope.onChangeRankingMode = function() {
+		$scope.loadRanking();
+	}
+
 	$scope.players = null;
 	
 	$scope.hasPlayed = function(r) {

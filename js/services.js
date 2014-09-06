@@ -5,7 +5,9 @@ kmServices.factory('Settings', function($resource) {
 });
 
 kmServices.factory('Ranking', function($resource) {
-	return $resource('api/ranking?nocache=' + (new Date()).getTime());
+	return $resource('api/ranking/:mode?nocache=' + (new Date()).getTime(), {}, {
+		query:	{method:'GET', params: {mode: '@mode'}, isArray: true}
+	});
 });
 
 kmServices.factory('Player', function($resource) {

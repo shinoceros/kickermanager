@@ -97,7 +97,7 @@
 		}
 	});
 	
-	$app->get('/ranking(/:season)', function ($season = -1) {
+	$app->get('/ranking/:mode(/:season)', function ($mode, $season = -1) {
 		try {
 			$db = DB::GetInstance();
 			$settings = $db->GetSettings();
@@ -105,8 +105,7 @@
 			if (-1 == $season) {
 				$season = $settings['currentSeason'];
 			}
-			// TODO: für alle seasons verfügbar machen
-			$results = $db->GetRanking($season);
+			$results = $db->GetRanking($mode, $season);
 			header('Content-Type: application/json');
 			echo json_encode_utf8($results);
 		} catch(Exception $e) {
@@ -152,7 +151,7 @@
 		try {
 			$db = DB::GetInstance();
 			$settings = $db->GetSettings();
-			$r = $db->GetRanking($settings['currentSeason'], 'index');
+			$r = $db->GetRanking('total', $settings['currentSeason'], 'index');
 			// if ids of players can not be found in ranking table they haven't played -> use base elo as input elo
 			$eloIn = array(
 				array_key_exists($match['f1'], $r) ? $r[$match['f1']]['elo'] : $settings['baseELO'],

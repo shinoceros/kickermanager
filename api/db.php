@@ -70,9 +70,37 @@
 			return $this->FillResultArray($query);
 		}		
 		
-		public function GetRanking($season, $method = 'default')
+
+		public function GetRanking($mode, $season, $method = 'default')
 		{
 			$settings = $this->GetSettings();
+			
+			$f1_subselect = "SELECT f1 AS pos, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, season FROM matches";
+			$b1_subselect = "SELECT b1 AS pos, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, season FROM matches";
+			$f2_subselect = "SELECT f2 AS pos, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, season FROM matches";
+			$b2_subselect = "SELECT b2 AS pos, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, season FROM matches";
+			
+			$subselects = array();
+			
+			switch ($mode) {
+				case 'attacker':
+					$subselects[] = $f1_subselect;
+					$subselects[] = $f2_subselect;
+					break;
+				case 'defender':
+					$subselects[] = $b1_subselect;
+					$subselects[] = $b2_subselect;
+					break;
+				case 'total':
+					$subselects[] = $f1_subselect;
+					$subselects[] = $f2_subselect;
+					$subselects[] = $b1_subselect;
+					$subselects[] = $b2_subselect;
+					break;
+				default:
+					break;
+			}
+			
 			// avg (score), count(*)
 			$query = "SELECT
 						p.id,
@@ -83,15 +111,8 @@
 						SUM(owngoals) - SUM(oppgoals) AS goaldiff,
 						SUM(IF(owngoals > oppgoals, 1, 0))/ COUNT(*) AS winrate
 						FROM players p
-						LEFT JOIN (
-							SELECT f1 AS pos, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, season FROM matches
-							UNION
-							SELECT b1 AS pos, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, season FROM matches
-							UNION
-							SELECT f2 AS pos, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, season FROM matches
-							UNION
-							SELECT b2 AS pos, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, season FROM matches
-						) AS m ON p.id = m.pos
+						LEFT JOIN (".implode(" UNION ", $subselects).")
+						AS m ON p.id = m.pos
  						WHERE m.season = $season
 						GROUP BY p.id";
 
