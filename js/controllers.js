@@ -32,7 +32,19 @@ kmControllers.controller('RankingCtrl', function($scope, Ranking) {
 	
 	$scope.hasPlayed = function(r) {
 		return r.total > 0;
-	}	
+	}
+
+	$scope.style = function(value) {
+		//TODO: get current user name
+		var loggedOnUser = 'Marshall';
+		if (value == loggedOnUser) {
+			return { "background-color": 'LemonChiffon' };
+        }
+        else
+        {
+			return { };
+        }
+	};
 });
 
 kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Settings, History, Statistic, Player) {
