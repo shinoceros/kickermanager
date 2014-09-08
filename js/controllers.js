@@ -45,17 +45,17 @@ kmControllers.controller('RankingCtrl', function($scope, Ranking) {
 		return r.total > 0;
 	}
 
-	$scope.style = function(value) {
-		//TODO: get current user name
+	$scope.isUserLoggedIn = function(userName) {
+		//@ANDY: get current user name
 		var loggedOnUser = 'XXXX';
-		if (value == loggedOnUser) {
-			return { "background-color": 'LemonChiffon' };
-        }
-        else
-        {
-			return { };
-        }
-	};
+		return (userName === loggedOnUser);
+	}
+	$scope.needsExercise = function(gamesPlayed) {
+		//@ANDY: Value shall be taken from database' options table.
+		var exerciseLimit = 10;
+		return (gamesPlayed < exerciseLimit);
+	}
+
 });
 
 kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Settings, History, Statistic, Player) {
@@ -172,17 +172,16 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 		$scope.submitting = false;
 	};
 	
-	$scope.style = function(value) {
-		//TODO: get current user name
+	$scope.isUserLoggedIn = function(userName) {
+		//@ANDY: get current user name
 		var loggedOnUser = 'XXXX';
-		if (value == loggedOnUser) {
-			return { "background-color": 'LemonChiffon' };
-        }
-        else
-        {
-			return { };
-        }
-	};
+		return (userName === loggedOnUser);
+	}
+	$scope.needsExercise = function(gamesPlayed) {
+		//@ANDY: Value shall be taken from database' options table.
+		var exerciseLimit = 10;
+		return (gamesPlayed < exerciseLimit);
+	}
 });
 
 kmControllers.controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
