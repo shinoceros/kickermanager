@@ -20,11 +20,11 @@
 	</tr>
 	<tr
 		ng-repeat="r in ranking | filter: hasPlayed | orderBy: '-elo'"
-		ng-class="{inactive: r.total < 10}">
-		<td ng-style="style(r.name)">{{$index + 1}}</td>
-		<td ng-style="style(r.name)"><a href="#/player/{{r.id}}" class="media-object">{{r.name}}</a></td>
-		<td ng-style="style(r.name)">{{r.elo | float: 1}}</td>
-		<td ng-style="style(r.name)">{{r.winrate | percent: 1}}</td>
-		<td ng-style="style(r.name)">{{r.goaldiff}}</td>
+		ng-class="{inactive: needsExercise(r.total), highlight: isUserLoggedIn(r.name)}">
+		<td >{{$index + 1}}</td>
+		<td ><a href="#/player/{{r.id}}" class="media-object">{{r.name}}</a></td>
+		<td >{{r.elo | float: 1}}</td>
+		<td >{{r.winrate | percent: 1}}</td>
+		<td >{{r.goaldiff}}</td>
 	</tr>
 </table>
