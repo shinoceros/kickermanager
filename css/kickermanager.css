@@ -34,4 +34,9 @@ table tr.inactive a { color: #b4bac0 !important}
 	color: red;
 }
 
+
 body { padding-top: 50px; }
+
+.table-striped tbody tr.highlight td {
+    background-color: Khaki;
+}
