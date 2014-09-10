@@ -59,3 +59,7 @@ kmApp.config(function($stateProvider, $urlRouterProvider) {
 			controller: 'AdministrationCtrl'
 		})
 });
+
+kmApp.run(function() {
+	FastClick.attach(document.body);
+});
