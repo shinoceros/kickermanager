@@ -28,38 +28,63 @@ kmApp.config(function($stateProvider, $urlRouterProvider) {
 	$urlRouterProvider.otherwise("/match");
 
 	$stateProvider
+		.state('login', {
+			url: '/login',
+			templateUrl: 'partials/login.html',
+			controller: 'LoginCtrl',
+			requiresAuth: false
+		})
 		.state('match', {
 			url: '/match',
 			templateUrl: 'partials/match.html',
-			controller: 'MatchCtrl'
+			controller: 'MatchCtrl',
+			requiresAuth: true
 		})
 		.state('ranking', {
 			url: '/ranking',
 			templateUrl: 'partials/ranking.html',
-			controller: 'RankingCtrl'
+			controller: 'RankingCtrl',
+			requiresAuth: true
 		})
 		.state('statistics', {
 			url: '/statistics',
 			templateUrl: 'partials/statistics.html',
-			controller: 'StatisticsCtrl'
+			controller: 'StatisticsCtrl',
+			requiresAuth: true
 		})
 		.state('statistics.elotrend', {
 			url: '/elotrend',
 			templateUrl: 'partials/statistics.elotrend.html',
-			controller: 'StatisticsCtrl'
+			controller: 'StatisticsCtrl',
+			requiresAuth: true
 		})
 		.state('playersetup', {
 			url: '/playersetup',
 			templateUrl: 'partials/playersetup.html',
-			controller: 'PlayerSetupCtrl'
+			controller: 'PlayerSetupCtrl',
+			requiresAuth: true
 		})
 		.state('administration', {
 			url: '/administration',
 			templateUrl: 'partials/administration.html',
-			controller: 'AdministrationCtrl'
+			controller: 'AdministrationCtrl',
+			requiresAuth: true
 		})
 });
 
-kmApp.run(function() {
+kmApp.run(function($rootScope, $state, AuthService) {
 	FastClick.attach(document.body);
+	$rootScope.$on('$stateChangeStart', function (ev, to, toParams, from, fromParams) {
+		// if route requires auth and user is not logged in
+		if (to.requiresAuth && !AuthService.isLoggedIn()) {
+			// redirect back to login
+//			ev.preventDefault();
+//			$state.go('login');
+		}
+/*		else if (routeAdmin($location.url()) && !RoleService.validateRoleAdmin(SessionService.currentUser)) {
+			// redirect back to login
+			ev.preventDefault();
+			$state.go('error');
+		}
+ */	});
 });

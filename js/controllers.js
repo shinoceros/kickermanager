@@ -25,6 +25,89 @@ kmControllers.controller('PageCtrl', function ($scope) {
 	});
 });
 
+kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, Player, AuthService) {
+	$scope.msg = '';
+	$scope.user = null;
+	$scope.pass = '';
+	$scope.maxDigits = 5;
+	$scope.blocked = false;
+	
+	$scope.codeLeds = [];
+	$scope.colorLed = 'default';
+	
+	for (var i = 0; i < $scope.maxDigits; ++i) {
+		$scope.codeLeds.push({id: i, on: false});
+	}
+	
+	$scope.keys = [
+		{code: '1', label: '1'},
+		{code: '2', label: '2'},
+		{code: '3', label: '3'},
+		{code: '4', label: '4'},
+		{code: '5', label: '5'},
+		{code: '6', label: '6'},
+		{code: '7', label: '7'},
+		{code: '8', label: '8'},
+		{code: '9', label: '9'},
+		{code: 'X', label: '<i class="fa fa-times"></i>'},
+		{code: '0', label: '0'},
+		{code: 'B', label: '<i class="fa fa-chevron-left"></i>'}
+	];
+	for (var i in $scope.keys) {
+		$scope.keys[i].label = $sce.trustAsHtml($scope.keys[i].label);
+	}
+	
+	$scope.players = Player.query();
+	
+	$scope.onKeyClick = function(keyCode) {
+		if (keyCode == 'X') {
+			$scope.pass = '';
+		}
+		else if (keyCode == 'B') {
+			if ($scope.pass.length > 0) {
+				$scope.pass = $scope.pass.substring(0, $scope.pass.length - 1);
+			}
+		}
+		else {
+			if ($scope.pass.length < $scope.maxDigits) {
+				$scope.pass += keyCode;
+			}
+		}
+		$scope.checkLoginInfo();
+	}
+	
+	$scope.$watch('pass', function(newVal, oldVal) {
+		for (var i in $scope.codeLeds) {
+			$scope.codeLeds[i].on = (i < newVal.length);
+		}
+	});
+	
+	$scope.checkLoginInfo = function() {
+		if ($scope.user !== null && $scope.pass.length == $scope.maxDigits) {
+			$scope.login();
+		}
+	}
+	
+	$scope.login = function() {
+		$scope.blocked = true;
+		AuthService.login($scope.user.name, $scope.pass).then( function(success) {
+			$scope.colorLed = (success ? 'green' : 'red');
+			$timeout(function() {
+				$scope.advance(success);
+			}, 1500);
+		});
+	}
+	
+	$scope.advance = function(success) {
+		$scope.pass = '';
+		$scope.blocked = false;
+		$scope.colorLed = 'default';
+		if (success) {
+			$state.go('match');
+		}	
+	}
+});
+
 kmControllers.controller('RankingCtrl', function($scope, Ranking) {
 	$scope.$emit('setTitle', 'Tabelle');
 	$scope.rankingMode = 'total';

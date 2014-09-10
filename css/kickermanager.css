@@ -40,3 +40,28 @@ body { padding-top: 50px; }
 .table-striped tbody tr.highlight td {
     background-color: Khaki;
 }
+
+.keypad {
+	width: 220px;
+	margin: auto;
+}
+
+.keypad button {
+	margin-bottom: 8px;
+	margin-right: 8px;
+	width: 60px;
+	height: 60px;
+	font-size: 23px;
+	line-height: 1.33;
+	border-radius: 6px;
+	font-weight: bold;
+	text-align: center;
+}
+.login-user {
+	max-width: 220px;
+	margin: auto auto 10px;
+}
+
+.login-leds {
+	margin-bottom: 10px;
+}
