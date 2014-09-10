@@ -260,11 +260,6 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 		var loggedOnUser = 'XXXX';
 		return (userName === loggedOnUser);
 	}
-	$scope.needsExercise = function(gamesPlayed) {
-		//@ANDY: Value shall be taken from database' options table.
-		var exerciseLimit = 10;
-		return (gamesPlayed < exerciseLimit);
-	}
 });
 
 kmControllers.controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
