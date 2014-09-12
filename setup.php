@@ -25,7 +25,7 @@
 	ini_set('max_execution_time', 900);
 	include('api/dbconfig.php');
 	include('api/functions.php');
-	
+		
 	class DatabaseSettings
 	{
 	
@@ -115,18 +115,80 @@
 		return $currentVersion;
 	}
 	
-	// ========================================================================
+	// =======================================================================
 	
-	function update($targetVersion)
+	private function AssignPINs()
 	{
-		if ($this->getCurrentVersion() < $targetVersion)
-		{
-			//TODO: implement update scenario
+		print "<pre><b>Assign new PINs to users:</b></pre>";
+		
+		if ($result=$this->db->query("SELECT * FROM players"))
+		{	
+			echo "<ul style='list-style-type:none'>";
+			while($row = $result->fetch_array(MYSQLI_ASSOC))
+			{
+				//print_r($row);
+				$newPin = $this->GenerateRandomPin();				
+				echo "<li>" . $row['name'] . " --> " . $newPin . "</li>";
+				$userId = $row['id'];
+				$this->db->query("UPDATE players SET pwd_hash='$newPin' WHERE Id='$userId'");
+			}
+			$result->free();
+			echo "</ul>";
 		}
 		else
 		{
-			print "<pre><b>UPDATE DB:</b> Database is up to date!</pre>";
+			$this->exitOnError("<pre><b>UPDATE DB:</b> Update of table players failed: <pre>");
 		}
+	}
+	
+	// =======================================================================
+	
+	private function GenerateRandomPin() 
+	{
+		$arrayChars = range(0, 9);
+		shuffle($arrayChars);
+		$sarrayChars = array_slice($arrayChars, 0, 5);
+    		return implode( $sarrayChars );
+	}
+	
+	// =======================================================================
+	
+	private function updateVersion2()
+	{
+		if ($this->getCurrentVersion() < 2)
+		{
+			print "<pre><b>UPDATE DB:</b> Upgrade database to Vs. 2.</pre>";
+		
+			if (!$this->db->query("ALTER TABLE `players` ADD pwd_hash varchar(32), ADD token varchar(32)"))
+			{
+				$this->exitOnError("Update of table players failed: ");
+			}
+			else
+			{
+				echo "<pre><b>UPDATE DB:</b> Update of table players done</pre>";
+			}
+			
+			// finally set version to 2
+			if (!$this->db->query("UPDATE version SET current=2"))
+			{
+				$this->exitOnError("Update of table players failed: ");
+			}
+		}
+		else
+		{
+			print "<pre><b>UPDATE DB:</b> Database has already version 2!</pre>";
+		}
+	}
+	
+	// ========================================================================
+	
+	function update()
+	{
+		// upgrade structure 
+		$this->updateVersion2();
+		
+		// generate new PINs for all users.
+		$this->AssignPINs();
 	}
 	
 	// ========================================================================
@@ -162,23 +224,23 @@
 		if (!$existsDB) 
 		{
 			echo "DB '" . DBConfig::$db . "' is not present\n";
-		    // If we couldn't, then it either doesn't exist, or we can't see it.
-		    $sql = 'CREATE DATABASE ' . DBConfig::$db;
+			// If we couldn't, then it either doesn't exist, or we can't see it.
+		    	$sql = 'CREATE DATABASE ' . DBConfig::$db;
 
-		    $res = $this->db->query($sql);
-		    if (!$res) 
-		    {
+		    	$res = $this->db->query($sql);
+		    	if (!$res) 
+		    	{
 				$this->exitOnError("CREATE DATABASE failed: ");
-		    }
-			else
+		    	}
+		    	else
 			{
 				echo "CREATE DATABASE OK\n";
 			}
 
-	    	if (!$this->db->select_db(DBConfig::$db))
-		    {
+	    		if (!$this->db->select_db(DBConfig::$db))
+			{
 				$this->exitOnError("SELECT DATABASE failed: ");
-		    }
+			}
 			else
 			{
 				$this->addTableVersion = true;
@@ -294,7 +356,7 @@
 }
 	$db_settings = new DatabaseSettings();
 	$db_settings->setup();
-	$db_settings->update(1);
+	$db_settings->update();
 ?>
 </body>
 </html>
