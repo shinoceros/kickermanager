@@ -162,14 +162,14 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
 
-	$scope.eloMode = 'day';
-	$scope.eloOffset = 0;
+	$scope.statsMode = 'day';
+	$scope.dateOffset = 0;
 	$scope.dateFormatted = "";
 	
 	$scope.getDate = function() {
 		var d = new Date();
-		var factor = ($scope.eloMode == 'week' ? 7 : 1);
-		d.setDate(d.getDate() + $scope.eloOffset * factor);
+		var factor = ($scope.statsMode == 'week' ? 7 : 1);
+		d.setDate(d.getDate() + $scope.dateOffset * factor);
 		return d;
 	}
 	
@@ -179,8 +179,8 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 
 	$scope.loadStats = function() {
 		var d = $scope.getDate();
-		$scope.dateFormatted = $filter('stats')(d, $scope.eloOffset, $scope.eloMode);
-		$scope.stats = Statistic.query({type: $scope.eloMode, param: $filter('date')(d, 'yyyy-MM-dd')});
+		$scope.dateFormatted = $filter('stats')(d, $scope.dateOffset, $scope.statsMode);
+		$scope.stats = Statistic.query({type: $scope.statsMode, param: $filter('date')(d, 'yyyy-MM-dd')});
 	}
 	
 	Settings.get().$promise.then(function(response) {
@@ -188,13 +188,17 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 		$scope.resetCtrl();
 	});
 
-	$scope.onChangeEloMode = function() {
-		$scope.eloOffset = 0;
+	$scope.onChangeStatsMode = function() {
+		$scope.dateOffset = 0;
 		$scope.loadStats();
 	}
 	
-	$scope.changeDate = function(offset) {
-		$scope.eloOffset += offset;
+	$scope.addDateOffset = function(offset) {
+		var newDateOffset = $scope.dateOffset + offset;
+		// don't show future stats (which wouldn't make sense), show reload instead
+		if (newDateOffset <= 0) {
+			$scope.dateOffset = newDateOffset;
+		}
 		$scope.loadStats();
 	}
 

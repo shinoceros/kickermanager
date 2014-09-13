@@ -93,20 +93,20 @@
 		<div class="row">
 			<div class="form-group text-center">
 				<div class="btn-group">
-					<label class="btn btn-primary" ng-change="onChangeEloMode()" ng-model="eloMode" btn-radio="'day'">Tages-ELO</label>
-					<label class="btn btn-primary" ng-change="onChangeEloMode()" ng-model="eloMode" btn-radio="'week'">Wochen-ELO</label>
+					<label class="btn btn-primary" ng-change="onChangeStatsMode()" ng-model="statsMode" btn-radio="'day'">Tages-Stats</label>
+					<label class="btn btn-primary" ng-change="onChangeStatsMode()" ng-model="statsMode" btn-radio="'week'">Wochen-Stats</label>
 				</div>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-xs-2 text-left">
-				<button type="button" class="btn btn-primary" ng-click="changeDate(-1)"><i class="fa fa-chevron-left"></i></button>
+				<button type="button" class="btn btn-primary" ng-click="addDateOffset(-1)"><i class="fa fa-chevron-left"></i></button>
 			</div>
 			<div class="col-xs-8 text-center">
 				<h4>{{dateFormatted}}</h4>
 			</div>
 			<div class="col-xs-2 text-right">
-				<button type="button" class="btn btn-primary" ng-disabled="eloOffset >= 0" ng-click="changeDate(1)"><i class="fa fa-chevron-right"></i></button>
+				<button type="button" class="btn btn-primary" ng-click="addDateOffset(1)"><i class="fa" ng-class="{'fa-chevron-right': dateOffset < 0, 'fa-refresh': dateOffset >= 0}"></i></button>
 			</div>
 		</div>
 	
