@@ -1,4 +1,4 @@
-var kmServices = angular.module('kmServices', ['ngResource']);
+var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage']);
 
 kmServices.factory('Settings', function($resource) {
 	return $resource('api/settings');
@@ -68,6 +68,19 @@ kmServices.factory('AuthService', function($resource, $q) {
 				deferred.resolve(false);
 			});
 			return p;
+		}
+	}
+});
+
+kmServices.factory('StorageService', function($localStorage) {
+	var ls = $localStorage;
+	return {
+		get: function (key) {
+			return ls[key];
+		},
+		
+		set: function (key, value) {
+			ls[key] = value;
 		}
 	}
 });

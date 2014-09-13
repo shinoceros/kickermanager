@@ -25,7 +25,7 @@ kmControllers.controller('PageCtrl', function ($scope) {
 	});
 });
 
-kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, Player, AuthService) {
+kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, Player, StorageService, AuthService) {
 	$scope.msg = '';
 	$scope.user = null;
 	$scope.pass = '';
@@ -38,7 +38,7 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 	for (var i = 0; i < $scope.maxDigits; ++i) {
 		$scope.codeLeds.push({id: i, on: false});
 	}
-	
+		
 	$scope.keys = [
 		{code: '1', label: '1'},
 		{code: '2', label: '2'},
@@ -57,7 +57,21 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 		$scope.keys[i].label = $sce.trustAsHtml($scope.keys[i].label);
 	}
 	
-	$scope.players = Player.query();
+	// fetch all players
+	Player.query().$promise.then(
+		function (data) {
+			$scope.players = data;
+			// try to get last logged in user from local storage
+			var storedUserId = StorageService.get('userid');
+			if (angular.isNumber(storedUserId)) {
+				for (var i in data) {
+					if (data[i].id == storedUserId) {
+						$scope.user = data[i];
+					}
+				}
+			}
+		}
+	);
 	
 	$scope.onKeyClick = function(keyCode) {
 		if (keyCode == 'X') {
@@ -90,6 +104,8 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 	
 	$scope.login = function() {
 		$scope.blocked = true;
+		// TODO: only for test purposes, later: store user id only if login successful
+		StorageService.set('userid', $scope.user.id);
 		AuthService.login($scope.user.name, $scope.pass).then( function(success) {
 			$scope.colorLed = (success ? 'green' : 'red');
 			$timeout(function() {
