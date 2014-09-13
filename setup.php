@@ -25,10 +25,10 @@
 	ini_set('max_execution_time', 900);
 	include('api/dbconfig.php');
 	include('api/functions.php');
-		
+
 	class DatabaseSettings
 	{
-	
+
 	var $db = NULL;
 	var $baseELO = 1200.0;
 	var $maxGoals = 6;
@@ -87,9 +87,9 @@
 
 		return ($total_num_rows == 0);
 	}
-	
+
 	// ========================================================================
-	
+
 	function getCurrentVersion()
 	{
 		$currentVersion = 1;
@@ -114,30 +114,39 @@
 
 		return $currentVersion;
 	}
-	
+
 	// =======================================================================
-	
+
 	private function AssignPINs()
 	{
-		print "<pre><b>Assign new PINs to users:</b></pre>";
-		
-		if ($result=$this->db->query("SELECT * FROM players"))
-		{	
-			echo "<ul style='list-style-type:none'>";
+		echo "<pre><b>ASSIGN PINs:</b> ";
+		$newPin = array();
+
+		if ($result=$this->db->query("SELECT * FROM players WHERE pwd_hash IS NULL"))
+		{
 			while($row = $result->fetch_array(MYSQLI_ASSOC))
 			{
-				//print_r($row);
-				$newPin = $this->GenerateRandomPin();				
-				echo "<li>" . $row['name'] . " --> " . $newPin . "</li>";
+				$newPin[$row['name']] = $this->GenerateRandomPin();
+				$tmpHash = md5($newPin[$row['name']]);
 				$userId = $row['id'];
-				$this->db->query("UPDATE players SET pwd_hash='$newPin' WHERE Id='$userId'");
+				$this->db->query("UPDATE players SET pwd_hash=IFNULL(pwd_hash, '$tmpHash') WHERE Id='$userId'");
 			}
 			$result->free();
-			echo "</ul>";
 		}
 		else
 		{
 			$this->exitOnError("<pre><b>UPDATE DB:</b> Update of table players failed: <pre>");
+		}
+
+		if (count($newPin) > 0)
+		{
+			print_r($newPin);
+			echo " ... done</pre>";
+			//TODO: Notify user about new pin. Maybe using swiftmailer.org (https://github.com/swiftmailer/swiftmailer.git)
+		}
+		else
+		{
+			echo "... noting to do</pre> ";
 		}
 	}
 	
