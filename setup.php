@@ -129,7 +129,7 @@
 				$newPin[$row['name']] = $this->GenerateRandomPin();
 				$tmpHash = md5($newPin[$row['name']]);
 				$userId = $row['id'];
-				$this->db->query("UPDATE players SET pwd_hash=IFNULL(pwd_hash, '$tmpHash') WHERE Id='$userId'");
+				$this->db->query("UPDATE players SET pwd_hash=IFNULL(pwd_hash, '$tmpHash') WHERE id='$userId'");
 			}
 			$result->free();
 		}
