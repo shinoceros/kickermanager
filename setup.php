@@ -334,7 +334,7 @@
 				echo "<li>matches done</li>";
 			}
 		}
-	
+
 		if ($this->addTableSettings)
 		{
 			if (!$this->db->query("CREATE TABLE IF NOT EXISTS `settings` (
