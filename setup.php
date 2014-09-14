@@ -2,7 +2,7 @@
 <body>
 <?php
 	/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
-	
+
 	/**
 	 * This file is used to setup or update the database by usig the database configuration.
 	 *
@@ -37,9 +37,9 @@
 	var $addTableSettings = false;
 	var $addTablePlayers = false;
 	var $addTableMatches = false;
-	
+
 	// ========================================================================
-	
+
 	function __construct()
 	{
 	}
@@ -61,9 +61,9 @@
 
 		die ("script terminated ;-(");
 	}
-	
+
 	// ========================================================================
-	
+
 	function __destruct()
 	{
 		if ($this->db)
@@ -71,9 +71,9 @@
 			$this->db->close();
 		}
 	}
-	
+
 	// ========================================================================
-	
+
 	function checkTable($tableName) 
 	{
 		$result = $this->db->query("SHOW TABLES LIKE '" . $tableName . "'");
@@ -149,9 +149,9 @@
 			echo "... nothing to do</pre> ";
 		}
 	}
-	
+
 	// =======================================================================
-	
+
 	private function GenerateRandomPin() 
 	{
 		$arrayChars = range(0, 9);
@@ -159,15 +159,15 @@
 		$sarrayChars = array_slice($arrayChars, 0, 5);
     		return implode( $sarrayChars );
 	}
-	
+
 	// =======================================================================
-	
+
 	private function updateVersion2()
 	{
 		if ($this->getCurrentVersion() < 2)
 		{
-			print "<pre><b>UPDATE DB:</b> Upgrade database to Vs. 2.</pre>";
-		
+			echo "<pre><b>UPDATE DB:</b> Upgrade database to Vs. 2.</pre>";
+
 			if (!$this->db->query("ALTER TABLE `players` ADD pwd_hash varchar(32), ADD token varchar(32)"))
 			{
 				$this->exitOnError("Update of table players failed: ");
@@ -176,7 +176,7 @@
 			{
 				echo "<pre><b>UPDATE DB:</b> Update of table players done</pre>";
 			}
-			
+
 			// finally set version to 2
 			if (!$this->db->query("UPDATE version SET current=2"))
 			{
@@ -185,23 +185,23 @@
 		}
 		else
 		{
-			print "<pre><b>UPDATE DB:</b> Database has already version 2!</pre>";
+			echo "<pre><b>UPDATE DB:</b> Database has already version 2!</pre>";
 		}
 	}
-	
+
 	// ========================================================================
-	
+
 	function update()
 	{
 		// upgrade structure 
 		$this->updateVersion2();
-		
+
 		// generate new PINs for all users.
 		$this->AssignPINs();
 	}
-	
+
 	// ========================================================================
-	
+
 	function setup() 
 	{
 		$startTime = microtime(true); 
@@ -225,23 +225,23 @@
 		{
     		$this->exitOnError("Exception abgefangen: " . $e->getMessage());
 		}
-	
+
 		// Make DBConfig::$db the current database if possible
 		$existsDB = $this->db->select_db(DBConfig::$db);
-	
+
 		// test is databse as specified in db config exists. If not, create db.
 		if (!$existsDB) 
 		{
 			echo "DB '" . DBConfig::$db . "' is not present\n";
 			// If we couldn't, then it either doesn't exist, or we can't see it.
-		    	$sql = 'CREATE DATABASE ' . DBConfig::$db;
+		    $sql = 'CREATE DATABASE ' . DBConfig::$db;
 
-		    	$res = $this->db->query($sql);
-		    	if (!$res) 
-		    	{
+		    $res = $this->db->query($sql);
+		    if (!$res) 
+		    {
 				$this->exitOnError("CREATE DATABASE failed: ");
-		    	}
-		    	else
+		    }
+		    else
 			{
 				echo "CREATE DATABASE OK\n";
 			}
@@ -302,9 +302,9 @@
 				echo "<li>players done</li>";
 			}
 		}
-	
+
 		if ($this->addTableMatches)
-		{		
+		{
 			if (!$this->db->query("CREATE TABLE IF NOT EXISTS `matches` (
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
 			  `f1` int(11) NOT NULL,
