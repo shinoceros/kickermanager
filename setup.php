@@ -146,7 +146,7 @@
 		}
 		else
 		{
-			echo "... noting to do</pre> ";
+			echo "... nothing to do</pre> ";
 		}
 	}
 	
