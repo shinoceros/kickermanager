@@ -168,7 +168,7 @@
 		{
 			echo "<pre><b>UPDATE DB:</b> Upgrade database to Vs. 2.</pre>";
 
-			if (!$this->db->query("ALTER TABLE `players` ADD pwd_hash varchar(32), ADD token varchar(32)"))
+			if (!$this->db->query("ALTER TABLE `players` ADD pwd_hash varchar(32), ADD role ENUM('user', 'admin')"))
 			{
 				$this->exitOnError("Update of table players failed: ");
 			}
