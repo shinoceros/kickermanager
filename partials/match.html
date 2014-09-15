@@ -120,7 +120,7 @@
 					<th style="min-width:10%">&nbsp;</th>
 					<th style="min-width:20%">Quote</th>
 				</tr>
-				<tr ng-repeat="d in stats | orderBy: '-deltaelo'" ng-class="{highlight: isUserLoggedIn(players[d.id].name)}">
+				<tr ng-repeat="d in stats | orderBy: '-deltaelo'" ng-class="{highlight: isCurrentUserId(players[d.id].id)}">
 					<td>{{$index + 1}}</td>
 					<td>{{players[d.id].name}}</td>
 					<td class='text-right'>{{d.deltaelo | float: 1}}</td>

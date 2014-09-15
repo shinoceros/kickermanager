@@ -1,16 +1,28 @@
 <?php
 	require 'Slim/Slim.php';
 	include ('functions.php');
+	include ('authmanager.php');
 
 	ini_set('max_execution_time', 900);
 	date_default_timezone_set("Europe/Berlin");
 
 	session_start();
+	$am = new AuthManager();
 	
 	\Slim\Slim::registerAutoloader();
 
 	$app = new \Slim\Slim();
 	$app->response->headers->set('Content-Type', 'application/json');
+	
+	$app->hook('slim.before.dispatch', function() use ($app, &$am) {
+		$route = $app->request->getPathInfo();
+		$method = $app->request->getMethod();
+		
+		// check if route requires auth
+ 		if ($am->requiresAuthentication($route, $method) && !$am->IsAuthenticated()) {
+			$app->halt(401);
+		}
+	});
 	
 	function HandleError($e)
 	{
@@ -19,13 +31,7 @@
 		$app->halt(400, $msg);
 		exit;
 	}
-	
-	function IsAuthed() {
-		return isset($_SESSION['authed']);
-	}
-	
-	// setup routes
-	
+
 	// GET routes
 	$app->get('/history/:type(/:param1(/:param2))', function ($type, $param1 = '', $param2 = '') {
 		try {
@@ -134,11 +140,6 @@
 		}
 	});
 	
-	$app->get('/admin/check', function() {
-		$res = array('check' => IsAuthed());
-		echo json_encode_utf8($res);
-	});
-	
 	$app->get('/', function() use ($app) {
 		$app->halt(401);
 	});
@@ -188,25 +189,30 @@
 	});
 
 	// login / logout
-	$app->post('/admin/:action', function($action) use ($app) {
+	$app->post('/auth/:action', function($action) use ($app, $am) {
 		$request = $app->request();
 		$cred = json_decode($request->getBody(), true);
 		switch($action) {
 			case 'login':
-				if (isset($cred['user']) && isset($cred['pw'])) {
-					if ($cred['user'] == 'kicker' && $cred['pw'] == 'supersteinfaust') {
-						$_SESSION['authed'] = true;
-					}
+				if ($am->login($cred['userId'], $cred['pin'])) {
+					$user = $am->getUserData();
+					echo json_encode_utf8($user);
 				}
+				else {
+					$app->halt(401);
+				}				
 				break;
 			case 'logout':
-				unset($_SESSION['authed']);
+				$am->logout();
+				break;
+			case 'check':
+				if ($am->isAuthenticated()) {
+					$user = $am->getUserData();
+					echo json_encode_utf8($user);
+				}
 				break;
 		}
-		if (!IsAuthed()) {
-			$app->halt(401);
-		}
-	})->conditions(array('action' => '(login|logout)'));
+	})->conditions(array('action' => '(login|logout|check)'));
 	
 	// PUT ROUTES
 	// update player
@@ -224,9 +230,6 @@
 
 	// update match
 	$app->put('/match', function() use ($app) {
-		if (!IsAuthed()) {
-			$app->halt(401);
-		}
 		try {
 			$request = $app->request();
 			$match = json_decode($request->getBody(), true);
@@ -239,9 +242,6 @@
 
 	// DELETE ROUTES
 	$app->delete('/match/:matchId', function($matchId) {
-		if (!IsAuthed()) {
-			$app->halt(401);
-		}
 		try {
 			$db = DB::GetInstance();
 			$db->DeleteMatch($matchId);

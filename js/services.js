@@ -34,42 +34,50 @@ kmServices.factory('Statistic', function($resource) {
 	return $resource('api/stats/:type/:param?nocache=' + (new Date()).getTime());
 });
 
-kmServices.factory('Admin', function($resource) {
-	return $resource('api/admin/:action', {}, {
+kmServices.factory('AuthService', function($resource, $q, SessionService) {
+	var _loggedIn = false;
+	var _r = $resource('api/auth/:action', {}, {
 		login:	{method:'POST', params: {action: 'login'}},
 		logout:	{method:'POST', params: {action: 'logout'}},
-		check:	{method:'GET', params: {action: 'check'}}
-	});
-});
-
-kmServices.factory('AuthService', function($resource, $q) {
-	var _loggedIn = false;
-	var _userName = null;
-	var _r = $resource('api/auth/:action', {}, {
-		login:	{method:'POST', params: {action: 'login'}}
+		check:  {method:'GET',  params: {action: 'check'}}
 	});
 	
 	return {
 		isLoggedIn: function() {
 			return _loggedIn;
 		},
-		login: function($user, $pw) {
+		login: function(userId, pin) {
 			var deferred = $q.defer();
 			var p = deferred.promise;
 			
- 			_r.login({user: $user, pw: $pw}).$promise.then(function success(res) {
+ 			_r.login({userId: userId, pin: pin}).$promise.then(function success(res) {
 				_loggedIn = true;
-				_userName = $user;
+				SessionService.currentUser = res;
 				deferred.resolve(true);
 			},
 			function error(res) {
 				_loggedIn = false;
-				_userName = null;
+				SessionService.currentUser = {id: null, name: null, role: null};
 				deferred.resolve(false);
 			});
 			return p;
+		},
+		logout: function() {
+			_r.logout();
+			_loggedIn = false;
+			SessionService.currentUser = {id: null, name: null, role: null};
 		}
 	}
+});
+
+kmServices.factory('SessionService', function() {
+	return {
+		currentUser: {
+			id: null,
+			name: null,
+			role: null
+		}
+	};
 });
 
 kmServices.factory('StorageService', function($localStorage) {

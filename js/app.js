@@ -78,8 +78,8 @@ kmApp.run(function($rootScope, $state, AuthService) {
 		// if route requires auth and user is not logged in
 		if (to.requiresAuth && !AuthService.isLoggedIn()) {
 			// redirect back to login
-//			ev.preventDefault();
-//			$state.go('login');
+			ev.preventDefault();
+			$state.go('login');
 		}
 /*		else if (routeAdmin($location.url()) && !RoleService.validateRoleAdmin(SessionService.currentUser)) {
 			// redirect back to login

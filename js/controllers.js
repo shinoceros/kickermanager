@@ -26,9 +26,9 @@ kmControllers.controller('PageCtrl', function ($scope) {
 });
 
 kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, Player, StorageService, AuthService) {
-	$scope.msg = '';
+	$scope.$emit('setTitle', '');
 	$scope.user = null;
-	$scope.pass = '';
+	$scope.pin = '';
 	$scope.maxDigits = 5;
 	$scope.blocked = false;
 	
@@ -75,29 +75,29 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 	
 	$scope.onKeyClick = function(keyCode) {
 		if (keyCode == 'X') {
-			$scope.pass = '';
+			$scope.pin = '';
 		}
 		else if (keyCode == 'B') {
-			if ($scope.pass.length > 0) {
-				$scope.pass = $scope.pass.substring(0, $scope.pass.length - 1);
+			if ($scope.pin.length > 0) {
+				$scope.pin = $scope.pin.substring(0, $scope.pin.length - 1);
 			}
 		}
 		else {
-			if ($scope.pass.length < $scope.maxDigits) {
-				$scope.pass += keyCode;
+			if ($scope.pin.length < $scope.maxDigits) {
+				$scope.pin += keyCode;
 			}
 		}
 		$scope.checkLoginInfo();
 	}
 	
-	$scope.$watch('pass', function(newVal, oldVal) {
+	$scope.$watch('pin', function(newVal, oldVal) {
 		for (var i in $scope.codeLeds) {
 			$scope.codeLeds[i].on = (i < newVal.length);
 		}
 	});
 	
 	$scope.checkLoginInfo = function() {
-		if ($scope.user !== null && $scope.pass.length == $scope.maxDigits) {
+		if ($scope.user !== null && $scope.pin.length == $scope.maxDigits) {
 			$scope.login();
 		}
 	}
@@ -106,25 +106,25 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 		$scope.blocked = true;
 		// TODO: only for test purposes, later: store user id only if login successful
 		StorageService.set('userid', $scope.user.id);
-		AuthService.login($scope.user.name, $scope.pass).then( function(success) {
-			$scope.colorLed = (success ? 'green' : 'red');
+		AuthService.login($scope.user.id, $scope.pin).then( function(isSuccess) {
+			$scope.colorLed = (isSuccess ? 'green' : 'red');
 			$timeout(function() {
-				$scope.advance(success);
+				$scope.advance(isSuccess);
 			}, 1500);
 		});
 	}
 	
-	$scope.advance = function(success) {
-		$scope.pass = '';
+	$scope.advance = function(isSuccess) {
+		$scope.pin = '';
 		$scope.blocked = false;
 		$scope.colorLed = 'default';
-		if (success) {
+		if (isSuccess) {
 			$state.go('match');
 		}	
 	}
 });
 
-kmControllers.controller('RankingCtrl', function($scope, Ranking) {
+kmControllers.controller('RankingCtrl', function($scope, Ranking, SessionService) {
 	$scope.$emit('setTitle', 'Tabelle');
 	$scope.rankingMode = 'total';
 	
@@ -144,11 +144,10 @@ kmControllers.controller('RankingCtrl', function($scope, Ranking) {
 		return r.total > 0;
 	}
 
-	$scope.isUserLoggedIn = function(userName) {
-		//@ANDY: get current user name
-		var loggedOnUser = 'XXXX';
-		return (userName === loggedOnUser);
+	$scope.isCurrentUserId = function(id) {
+		return (id == SessionService.currentUser.id);
 	}
+
 	$scope.needsExercise = function(gamesPlayed) {
 		//@ANDY: Value shall be taken from database' options table.
 		var exerciseLimit = 10;
@@ -157,7 +156,7 @@ kmControllers.controller('RankingCtrl', function($scope, Ranking) {
 
 });
 
-kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Settings, History, Statistic, Player) {
+kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Settings, History, Statistic, Player, SessionService) {
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
@@ -275,10 +274,8 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 		$scope.submitting = false;
 	};
 	
-	$scope.isUserLoggedIn = function(userName) {
-		//@ANDY: get current user name
-		var loggedOnUser = 'XXXX';
-		return (userName === loggedOnUser);
+	$scope.isCurrentUserId = function(id) {
+		return (id == SessionService.currentUser.id);
 	}
 });
 
@@ -395,66 +392,18 @@ kmControllers.controller('PlayerSetupCtrl', function($scope, Player) {
 	}
 });
 
-kmControllers.controller('AdministrationCtrl', function($scope, $filter, Admin, Player, Match, History) {
+kmControllers.controller('AdministrationCtrl', function($scope, $filter, Player, Match, History) {
 	$scope.$emit('setTitle', 'Administration');
 	
-	$scope.checked = false;
-	$scope.authed = false;
 	$scope.players = new Array();
 	$scope.date = new Date();
-	$scope.user = '';
-	$scope.pw = '';
-	
-	$scope.init = function() {
-		if ($scope.authed) {
-			$scope.loadPlayers();
-		}
-	};
-	
-	// first check if we are logged in
-	Admin.check().$promise.then(function(response) {
-		$scope.checked = true;
-		if (response.check) {
-			$scope.authed = true;
-			$scope.init();
-		}
-	});
-	
-	$scope.login = function() {
-		Admin.login({user: $scope.user, pw: $scope.pw}).$promise.then(
-			function (success) {
-				$scope.authed = true;
-				$scope.init();
-			},
-			function (error) {
-				$scope.user = '';
-				$scope.pw = '';
-				$scope.authed = false;
-			}
-		);
-	};
-
-	$scope.logout = function() {
-		Admin.logout({}).$promise.then(
-			function (success) {
-				$scope.user = '';
-				$scope.pw = '';
-				$scope.authed = false;
-			},
-			function (error) {
-				$scope.user = '';
-				$scope.pw = '';
-				$scope.authed = false;
-			}
-		);
-	};
-
+		
 	$scope.loadPlayers = function() {
 		Player.query().$promise.then(function(response) {
 			// index array for faster access
-			for (var i in response) {
-				$scope.players[response[i].id] = response[i];
-			}
+			angular.forEach(response, function(value, idx) {
+				$scope.players[value.id] = value;
+			});
 			$scope.loadMatches();
 		});
 	};
@@ -489,4 +438,6 @@ kmControllers.controller('AdministrationCtrl', function($scope, $filter, Admin, 
 			}
 		);
 	};
+	
+	$scope.loadPlayers();
 });

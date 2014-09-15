@@ -187,6 +187,19 @@
 			return $this->FillResultArray($query);
 		}
 
+		public function checkCredentials($userId, $pin)
+		{
+			$userinfo = null;
+			$query = sprintf("SELECT id, name FROM players WHERE id = %d AND pwd_hash = MD5('%s')", $userId, $pin);
+			$result = $this->mysqli->query($query);
+
+			if ($result->num_rows == 1) {
+				$userinfo = $result->fetch_array(MYSQLI_ASSOC);
+			}
+			
+			return $userinfo;
+		}
+		
 		public function AddMatch($match)
 		{
 			$settings = $this->GetSettings();
