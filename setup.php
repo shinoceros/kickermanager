@@ -28,7 +28,6 @@
 
 	class DatabaseSettings
 	{
-
 	var $db = NULL;
 	var $baseELO = 1200.0;
 	var $maxGoals = 6;
