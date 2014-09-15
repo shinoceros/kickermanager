@@ -190,10 +190,43 @@
 
 	// ========================================================================
 
+	public function AddAdmin()
+	{
+		$query = "SELECT * FROM players WHERE name = 'admin'";
+		$result = $this->db->query($query);
+		if (0 != $result->num_rows)
+		{
+			$admin = $result->fetch_object();
+			if (is_null($admin->pwd_hash))
+			{
+				echo ("Spieler $admin->name existiert bereits; braucht aber noch 'nen PIN!");
+			}
+			else
+			{
+				echo ("Spieler $admin->name existiert bereits; hat sogar schon 'nen PIN!");
+			}
+			$result->free();
+
+		}
+		else
+		{
+			$result->free();
+			echo ("Füge neuen admin hinzu.");
+			$query = "INSERT INTO players (name, active, role) VALUES ('admin', 1, 'admin')";
+			$result = $this->db->query($query);
+		}
+		return;
+	}
+
+	// ========================================================================
+
 	function update()
 	{
 		// upgrade structure 
 		$this->updateVersion2();
+
+		// add admin
+		$this->AddAdmin();
 
 		// generate new PINs for all users.
 		$this->AssignPINs();
