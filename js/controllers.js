@@ -366,6 +366,7 @@ kmControllers.controller('PlayerSetupCtrl', function($scope, Player) {
 		Player.save({name: $scope.newplayer}).$promise.then(
 			function (response) {
 				$scope.result = {text: 'Spieler ' + response.name + ' erfolgreich hinzugefügt.', error: false }
+				$scope.newplayer = "";
 				$scope.loadPlayers();
 			},
 			function (response) {
