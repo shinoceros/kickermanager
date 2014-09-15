@@ -1,17 +1,17 @@
 <?php
 	include_once ('db.php');
-	
+
 	class AuthManager {
 
 		private $userData = null;
-	
+
 		function __construct() {
 			$this->getSessionData();
 			if ($this->userData === null) {
 				$this->resetSessionData();
 			}
 		}
-	
+
 		public function requiresAuthentication($route, $method)
 		{
 			// TODO: make this fancier
@@ -33,21 +33,20 @@
 		public function getUserData() {
 			return $this->userData;
 		}
-		
+
 		public function isAuthenticated() {
 			$this->getSessionData();
 			return ($this->userData['id'] !== null);
 		}
-		
+
 		public function login($userId, $pin) {
 			$db = DB::GetInstance();
 			$userinfo = $db->checkCredentials($userId, $pin);
-			
+
 			if ($userinfo !== null) {
 				$this->userData['id'] = $userinfo['id'];
 				$this->userData['name'] = $userinfo['name'];
-				// TODO: add role
-				//$this->userData['role'] = $userinfo['role'];
+				$this->userData['role'] = $userinfo['role'];
 				$this->setSessionData();
 				return true;
 			}
@@ -56,11 +55,11 @@
 				return false;
 			}
 		}
-		
+
 		public function logout() {
 			$this->resetSessionData();
 		}
-		
+
 		private function resetSessionData()
 		{
 			$this->userData = array(
@@ -70,7 +69,7 @@
 			);
 			$this->setSessionData();
 		}
-		
+
 		private function getSessionData()
 		{
 			global $_SESSION;
