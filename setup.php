@@ -139,6 +139,7 @@
 
 		if (count($newPin) > 0)
 		{
+			ksort($newPin);
 			print_r($newPin);
 			echo " ... done</pre>";
 			//TODO: Notify user about new pin. Maybe using swiftmailer.org (https://github.com/swiftmailer/swiftmailer.git)
