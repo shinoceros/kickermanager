@@ -4,14 +4,18 @@
 
 var kmControllers = angular.module('kmControllers', []);
 
-kmControllers.controller('PageCtrl', function ($scope) {
+kmControllers.controller('PageCtrl', function ($scope, $state, AuthService) {
 	$scope.tabs = [
-		{ link : 'match', label : 'Spiel', icon: 'edit' },
-		{ link : 'ranking', label : 'Tabelle', icon: 'trophy' },
-		{ link : 'statistics', label : 'Statistik', icon: 'bar-chart-o' },
-		{ link : 'playersetup', label : 'Spieler', icon: 'user' },
-		{ link : 'administration', label : 'Administration', icon: 'cog' }
-	]; 
+		{ link : 'user.match', label : 'Spiel', icon: 'edit' },
+		{ link : 'user.ranking', label : 'Tabelle', icon: 'trophy' },
+		{ link : 'user.statistics', label : 'Statistik', icon: 'bar-chart-o' },
+		{ link : 'user.playersetup', label : 'Spieler', icon: 'user' },
+		{ link : 'admin.administration', label : 'Administration', icon: 'cog' }
+	];
+	
+	angular.forEach($scope.tabs, function(item, idx) {
+		item.show = false;
+	});
     
 	$scope.isCollapsed = true;
 	
@@ -23,6 +27,21 @@ kmControllers.controller('PageCtrl', function ($scope) {
 		event.stopPropagation();
 		$scope.title = title;
 	});
+	
+	$scope.loggedIn = false;
+	
+	$scope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
+		angular.forEach($scope.tabs, function(tab, idx) {
+			tab.show = AuthService.authorize($state.get(tab.link).data.access);
+		});
+		$scope.loggedIn = AuthService.isLoggedIn();
+	});
+	
+	$scope.logout = function() {
+		AuthService.logout().then(function success() {
+			$state.go('anon.login');
+		});
+	}
 });
 
 kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, Player, StorageService, AuthService) {
@@ -119,7 +138,7 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 		$scope.blocked = false;
 		$scope.colorLed = 'default';
 		if (isSuccess) {
-			$state.go('match');
+			$state.go('user.match');
 		}	
 	}
 });

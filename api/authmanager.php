@@ -18,6 +18,7 @@
 			$required = true;
 			$publicRoutes = array(
 				'/auth/login' => 'POST',
+				'/auth/check' => 'GET',
 				'/player' => 'GET'
 			);
 			foreach ($publicRoutes as $r => $m) {

@@ -35,7 +35,10 @@ kmServices.factory('Statistic', function($resource) {
 });
 
 kmServices.factory('AuthService', function($resource, $q, SessionService) {
-	var _loggedIn = false;
+
+	var accessLevels = routingConfig.accessLevels
+		, userRoles = routingConfig.userRoles;
+
 	var _r = $resource('api/auth/:action', {}, {
 		login:	{method:'POST', params: {action: 'login'}},
 		logout:	{method:'POST', params: {action: 'logout'}},
@@ -43,29 +46,38 @@ kmServices.factory('AuthService', function($resource, $q, SessionService) {
 	});
 	
 	return {
+		authorize: function(accessLevel) {
+			role = SessionService.currentUser.role;
+			return accessLevel.bitMask & role.bitMask;
+		},
 		isLoggedIn: function() {
-			return _loggedIn;
+			return (SessionService.currentUser.id !== null);
 		},
 		login: function(userId, pin) {
 			var deferred = $q.defer();
 			var p = deferred.promise;
 			
  			_r.login({userId: userId, pin: pin}).$promise.then(function success(res) {
-				_loggedIn = true;
-				SessionService.currentUser = res;
+				SessionService.currentUser = {id: res.id, name: res.name, role: userRoles[res.role]};
 				deferred.resolve(true);
 			},
 			function error(res) {
-				_loggedIn = false;
-				SessionService.currentUser = {id: null, name: null, role: null};
+				SessionService.currentUser = {id: null, name: null, role: userRoles.public};
 				deferred.resolve(false);
 			});
 			return p;
 		},
 		logout: function() {
-			_r.logout();
-			_loggedIn = false;
-			SessionService.currentUser = {id: null, name: null, role: null};
+			var deferred = $q.defer();
+			var p = deferred.promise;
+			_r.logout().$promise.then(function success(res) {
+				deferred.resolve();
+			},
+			function error(res) {
+				deferred.resolve();
+			});
+			SessionService.currentUser = {id: null, name: null, role: userRoles.public};
+			return p;
 		}
 	}
 });
@@ -75,7 +87,7 @@ kmServices.factory('SessionService', function() {
 		currentUser: {
 			id: null,
 			name: null,
-			role: null
+			role: routingConfig.userRoles.public
 		}
 	};
 });

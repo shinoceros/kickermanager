@@ -191,28 +191,34 @@
 	// login / logout
 	$app->post('/auth/:action', function($action) use ($app, $am) {
 		$request = $app->request();
-		$cred = json_decode($request->getBody(), true);
+
 		switch($action) {
 			case 'login':
+				$cred = json_decode($request->getBody(), true);
 				if ($am->login($cred['userId'], $cred['pin'])) {
 					$user = $am->getUserData();
 					echo json_encode_utf8($user);
 				}
 				else {
 					$app->halt(401);
-				}				
+				}
 				break;
 			case 'logout':
 				$am->logout();
 				break;
-			case 'check':
-				if ($am->isAuthenticated()) {
-					$user = $am->getUserData();
-					echo json_encode_utf8($user);
-				}
-				break;
 		}
-	})->conditions(array('action' => '(login|logout|check)'));
+	})->conditions(array('action' => '(login|logout)'));
+
+	// check session
+	$app->get('/auth/check', function() use ($app, $am) {
+		if ($am->isAuthenticated()) {
+			$user = $am->getUserData();
+			echo json_encode_utf8($user);
+		}
+		else {
+			$app->halt(401);
+		}
+	});
 	
 	// PUT ROUTES
 	// update player

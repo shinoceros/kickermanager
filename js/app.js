@@ -27,64 +27,99 @@ kmApp.directive('ngReallyClick', [function() {
 kmApp.config(function($stateProvider, $urlRouterProvider) {
 	$urlRouterProvider.otherwise("/match");
 
+	var access = routingConfig.accessLevels;
+	
+	// anonymous routes
 	$stateProvider
-		.state('login', {
+		.state('anon', {
+			abstract: true,
+			template: '<ui-view/>',
+			data: {
+				access: access.anon
+			}
+		})
+		.state('anon.login', {
 			url: '/login',
 			templateUrl: 'partials/login.html',
-			controller: 'LoginCtrl',
-			requiresAuth: false
+			controller: 'LoginCtrl'
+		});
+		
+	// user routes
+	$stateProvider
+		.state('user', {
+			abstract: true,
+			template: '<ui-view/>',
+			data: {
+				access: access.user
+			}
 		})
-		.state('match', {
+		.state('user.match', {
 			url: '/match',
 			templateUrl: 'partials/match.html',
-			controller: 'MatchCtrl',
-			requiresAuth: true
+			controller: 'MatchCtrl'
 		})
-		.state('ranking', {
+		.state('user.ranking', {
 			url: '/ranking',
 			templateUrl: 'partials/ranking.html',
-			controller: 'RankingCtrl',
-			requiresAuth: true
+			controller: 'RankingCtrl'
 		})
-		.state('statistics', {
+		.state('user.statistics', {
 			url: '/statistics',
 			templateUrl: 'partials/statistics.html',
-			controller: 'StatisticsCtrl',
-			requiresAuth: true
+			controller: 'StatisticsCtrl'
 		})
-		.state('statistics.elotrend', {
+		.state('user.statistics.elotrend', {
 			url: '/elotrend',
 			templateUrl: 'partials/statistics.elotrend.html',
-			controller: 'StatisticsCtrl',
-			requiresAuth: true
+			controller: 'StatisticsCtrl'
 		})
-		.state('playersetup', {
+		.state('user.playersetup', {
 			url: '/playersetup',
 			templateUrl: 'partials/playersetup.html',
-			controller: 'PlayerSetupCtrl',
-			requiresAuth: true
+			controller: 'PlayerSetupCtrl'
 		})
-		.state('administration', {
+
+	// admin routes
+	$stateProvider
+		.state('admin' , {
+			abstract: true,
+			template: '<ui-view/>',
+			data: {
+				access: access.admin
+			}
+		})
+		.state('admin.administration', {
 			url: '/administration',
 			templateUrl: 'partials/administration.html',
-			controller: 'AdministrationCtrl',
-			requiresAuth: true
+			controller: 'AdministrationCtrl'
 		})
 });
 
 kmApp.run(function($rootScope, $state, AuthService) {
 	FastClick.attach(document.body);
-	$rootScope.$on('$stateChangeStart', function (ev, to, toParams, from, fromParams) {
-		// if route requires auth and user is not logged in
-		if (to.requiresAuth && !AuthService.isLoggedIn()) {
-			// redirect back to login
-			ev.preventDefault();
-			$state.go('login');
+
+	$rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
+		//console.log('$stateChangeStart: ' + fromState.name + ' => ' + toState.name);
+
+		if (!('data' in toState) || !('access' in toState.data)) {
+			$rootScope.error = "Access undefined for this state";
+			event.preventDefault();
 		}
-/*		else if (routeAdmin($location.url()) && !RoleService.validateRoleAdmin(SessionService.currentUser)) {
-			// redirect back to login
-			ev.preventDefault();
-			$state.go('error');
+		else if (!AuthService.authorize(toState.data.access)) {
+			$rootScope.error = "Seems like you tried accessing a route you don't have access to...";
+			event.preventDefault();
+			if (fromState.url === '^') {
+				if (AuthService.isLoggedIn()) {
+					$state.go('user.match');
+				} else {
+					$rootScope.error = null;
+					$state.go('anon.login');
+				}
+			}
 		}
- */	});
-});
+	});
+ 
+/*  	$rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error) {
+		console.log('$stateChangeError: ' + fromState.name + ' => ' + toState.name);
+	});
+ */});
