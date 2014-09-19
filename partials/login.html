@@ -3,7 +3,7 @@
 	<div class="row-fluid">
 		<div class="col-xs-12 col-lg-offset-4 col-lg-4">
 			<label for="user">Benutzer</label>
-			<select id="user" class="form-control login-user" ng-change="checkLoginInfo()" ng-model="user" ng-disabled="!players.length || blocked" ng-options="p as p.name for p in (players | active | orderBy: 'name')">
+			<select id="user" class="form-control login-user" ng-change="checkLoginInfo()" ng-model="user" ng-disabled="!players.length || locked" ng-options="p as p.name for p in (players | active | orderBy: 'name')">
 				<option value="">-- ausw&auml;hlen --</option>
 			</select>
 		</div>
@@ -19,9 +19,13 @@
 	</div>
 
 	<div class="row-fluid">
-		<div class="text-center keypad">
-			<button type="button" class="btn btn-primary" ng-repeat="key in keys" ng-bind-html="key.label" ng-disabled="(user === null) || blocked" ng-click="onKeyClick(key.code)"></button>
+		<div class="col-xs-12 col-lg-offset-4 col-lg-4 text-center login-leds">
+			<km-ledbar size="maxDigits" count="pin.length"></km-ledbar>
 		</div>
+	</div>
+
+	<div class="row-fluid text-center">
+		<km-keypad size="maxDigits" ng-model="pin" ng-disabled="locked"></km-keypad>
 	</div>
 
 </div>

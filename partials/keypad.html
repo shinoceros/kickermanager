@@ -1,0 +1,4 @@
+<div class="keypad">
+	<button type="button" class="btn btn-primary" ng-repeat="k in keys" ng-bind-html="k.label" ng-click="onKeyPress(k.code)" ng-disabled="locked">
+	</button>
+</div>

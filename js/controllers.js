@@ -49,7 +49,7 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 	$scope.user = null;
 	$scope.pin = '';
 	$scope.maxDigits = 5;
-	$scope.blocked = false;
+	$scope.locked = false;
 	
 	$scope.codeLeds = [];
 	$scope.colorLed = 'default';
@@ -58,24 +58,6 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 		$scope.codeLeds.push({id: i, on: false});
 	}
 		
-	$scope.keys = [
-		{code: '1', label: '1'},
-		{code: '2', label: '2'},
-		{code: '3', label: '3'},
-		{code: '4', label: '4'},
-		{code: '5', label: '5'},
-		{code: '6', label: '6'},
-		{code: '7', label: '7'},
-		{code: '8', label: '8'},
-		{code: '9', label: '9'},
-		{code: 'X', label: '<i class="fa fa-times"></i>'},
-		{code: '0', label: '0'},
-		{code: 'B', label: '<i class="fa fa-chevron-left"></i>'}
-	];
-	for (var i in $scope.keys) {
-		$scope.keys[i].label = $sce.trustAsHtml($scope.keys[i].label);
-	}
-	
 	// fetch all players
 	Player.query().$promise.then(
 		function (data) {
@@ -92,37 +74,17 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 		}
 	);
 	
-	$scope.onKeyClick = function(keyCode) {
-		if (keyCode == 'X') {
-			$scope.pin = '';
-		}
-		else if (keyCode == 'B') {
-			if ($scope.pin.length > 0) {
-				$scope.pin = $scope.pin.substring(0, $scope.pin.length - 1);
-			}
-		}
-		else {
-			if ($scope.pin.length < $scope.maxDigits) {
-				$scope.pin += keyCode;
-			}
-		}
-		$scope.checkLoginInfo();
-	}
-	
 	$scope.$watch('pin', function(newVal, oldVal) {
+		if ($scope.user !== null && $scope.pin.length == $scope.maxDigits) {
+			$scope.login();
+		}
 		for (var i in $scope.codeLeds) {
 			$scope.codeLeds[i].on = (i < newVal.length);
 		}
 	});
 	
-	$scope.checkLoginInfo = function() {
-		if ($scope.user !== null && $scope.pin.length == $scope.maxDigits) {
-			$scope.login();
-		}
-	}
-	
 	$scope.login = function() {
-		$scope.blocked = true;
+		$scope.locked = true;
 		// TODO: only for test purposes, later: store user id only if login successful
 		StorageService.set('userid', $scope.user.id);
 		AuthService.login($scope.user.id, $scope.pin).then( function(isSuccess) {
@@ -135,7 +97,7 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 	
 	$scope.advance = function(isSuccess) {
 		$scope.pin = '';
-		$scope.blocked = false;
+		$scope.locked = false;
 		$scope.colorLed = 'default';
 		if (isSuccess) {
 			$state.go('user.match');

@@ -6,23 +6,10 @@ var kmApp = angular.module('kmApp', [
 	'kmControllers',
 	'kmServices',
 	'kmFilters',
+	'kmDirectives',
 	'angular-loading-bar',
 	'highcharts-ng'
 ]);
-
-kmApp.directive('ngReallyClick', [function() {
-	return {
-		restrict: 'A',
-		link: function(scope, element, attrs) {
-			element.bind('click', function() {
-				var message = attrs.ngReallyMessage;
-				if (message && confirm(message)) {
-					scope.$apply(attrs.ngReallyClick);
-				}
-			});
-		}
-	}
-}]);
 
 kmApp.config(function($stateProvider, $urlRouterProvider) {
 	$urlRouterProvider.otherwise("/match");
