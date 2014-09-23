@@ -230,6 +230,12 @@
 			$result = $this->mysqli->query($query);
 			return $this->mysqli->insert_id;
 		}
+		
+		public function UpdatePlayerPassword($player)
+		{
+			$query = sprintf("UPDATE `players` SET `pwd_hash`='%s' WHERE `id` = %d", md5($pin), $player['id']);
+			$this->mysqli->query($query);
+		}
 
 		public function UpdatePlayer($player)
 		{
