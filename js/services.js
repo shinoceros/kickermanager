@@ -34,7 +34,7 @@ kmServices.factory('Statistic', function($resource) {
 	return $resource('api/stats/:type/:param?nocache=' + (new Date()).getTime());
 });
 
-kmServices.factory('AuthService', function($resource, $q, SessionService) {
+kmServices.factory('AuthService', function($resource, $q, SessionService, StorageService) {
 
 	var accessLevels = routingConfig.accessLevels
 		, userRoles = routingConfig.userRoles;
@@ -59,6 +59,7 @@ kmServices.factory('AuthService', function($resource, $q, SessionService) {
 			
  			_r.login({userId: userId, pin: pin}).$promise.then(function success(res) {
 				SessionService.currentUser = {id: res.id, name: res.name, role: userRoles[res.role]};
+				StorageService.set('userid', res.id);
 				deferred.resolve(true);
 			},
 			function error(res) {
@@ -77,6 +78,21 @@ kmServices.factory('AuthService', function($resource, $q, SessionService) {
 				deferred.resolve();
 			});
 			SessionService.currentUser = {id: null, name: null, role: userRoles.public};
+			return p;
+		},
+		check: function() {
+			var deferred = $q.defer();
+			var p = deferred.promise;
+			_r.check().$promise.then(function success(res) {
+				if (res.result) {
+					SessionService.currentUser = {id: res.id, name: res.name, role: userRoles[res.role]};
+					deferred.resolve(true);
+				}
+				else {
+					SessionService.currentUser = {id: null, name: null, role: userRoles.public};
+					deferred.resolve(false);
+				}
+			});
 			return p;
 		}
 	}

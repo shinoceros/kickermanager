@@ -9,9 +9,8 @@ var kmApp = angular.module('kmApp', [
 	'kmDirectives',
 	'angular-loading-bar',
 	'highcharts-ng'
-]);
-
-kmApp.config(function($stateProvider, $urlRouterProvider) {
+])
+.config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 	$urlRouterProvider.otherwise("/match");
 
 	var access = routingConfig.accessLevels;
@@ -26,8 +25,13 @@ kmApp.config(function($stateProvider, $urlRouterProvider) {
 			}
 		})
 		.state('anon.login', {
-			url: '/login',
+			url: '/login/:redirect',
 			templateUrl: 'partials/login.html',
+			resolve: {
+				check: function(AuthService) {
+					return AuthService.check();
+				}
+			},
 			controller: 'LoginCtrl'
 		});
 		
@@ -64,7 +68,7 @@ kmApp.config(function($stateProvider, $urlRouterProvider) {
 			url: '/playersetup',
 			templateUrl: 'partials/playersetup.html',
 			controller: 'PlayerSetupCtrl'
-		})
+		});
 
 	// admin routes
 	$stateProvider
@@ -79,34 +83,35 @@ kmApp.config(function($stateProvider, $urlRouterProvider) {
 			url: '/administration',
 			templateUrl: 'partials/administration.html',
 			controller: 'AdministrationCtrl'
-		})
-});
-
-kmApp.run(function($rootScope, $state, AuthService) {
+		});
+		
+	$httpProvider.interceptors.push(function($q, $injector) {
+		return {
+			'responseError': function(response) {
+				if (response.status === 401) {
+					$injector.get('$state').go('anon.login');
+				}
+				return $q.reject(response);
+			}
+		};
+	});
+})
+.run(function($rootScope, $state, AuthService) {
 	FastClick.attach(document.body);
 
 	$rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
+
 		//console.log('$stateChangeStart: ' + fromState.name + ' => ' + toState.name);
 
+		// invalid state definition
 		if (!('data' in toState) || !('access' in toState.data)) {
-			$rootScope.error = "Access undefined for this state";
 			event.preventDefault();
+			return;
 		}
-		else if (!AuthService.authorize(toState.data.access)) {
-			$rootScope.error = "Seems like you tried accessing a route you don't have access to...";
+ 		if (!AuthService.authorize(toState.data.access) && toState.name !== 'anon.login') {
 			event.preventDefault();
-			if (fromState.url === '^') {
-				if (AuthService.isLoggedIn()) {
-					$state.go('user.match');
-				} else {
-					$rootScope.error = null;
-					$state.go('anon.login');
-				}
-			}
+			$state.go('anon.login', {redirect: toState.name});
+			return;
 		}
 	});
- 
-/*  	$rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error) {
-		console.log('$stateChangeError: ' + fromState.name + ' => ' + toState.name);
-	});
- */});
+});

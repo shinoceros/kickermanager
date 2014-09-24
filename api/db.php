@@ -189,15 +189,12 @@
 
 		public function checkCredentials($userId, $pin)
 		{
-			$userinfo = null;
 			$query = sprintf("SELECT id, name, role FROM players WHERE id = %d AND pwd_hash = '%s'", $userId, md5($pin));
-			$result = $this->mysqli->query($query);
-
-			if ($result->num_rows == 1) {
-				$userinfo = $result->fetch_array(MYSQLI_ASSOC);
+			$res = $this->FillResultArray($query);
+			if (count($res) == 1) {
+				return $res[0];
 			}
-
-			return $userinfo;
+			return null;
 		}
 
 		public function AddMatch($match)

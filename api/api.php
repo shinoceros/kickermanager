@@ -212,12 +212,13 @@
 	// check session
 	$app->get('/auth/check', function() use ($app, $am) {
 		if ($am->isAuthenticated()) {
-			$user = $am->getUserData();
-			echo json_encode_utf8($user);
+			$userData = $am->getUserData();
+			$userData['result'] = true;
 		}
 		else {
-			$app->halt(401);
+			$userData = array('result' => false);
 		}
+		echo json_encode_utf8($userData);
 	});
 	
 	// PUT ROUTES

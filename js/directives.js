@@ -69,25 +69,22 @@ kmDirectives.directive('kmLedbar', function() {
 		restrict: 'E',
 		scope: {
 			size: '=',
-			count: '='
+			count: '=',
+			color: '='
 		},
+		replace: true,
 		templateUrl: 'partials/ledbar.html',
 		controller: function($scope) {
-			$scope.codeLeds = [];
-			$scope.colorLed = 'default';
-	
+			$scope.leds = [];
 			for (var i = 0; i < $scope.size; ++i) {
-				$scope.codeLeds.push({id: i, on: false});
+				$scope.leds.push({id: i, on: false});
 			}
-			
-
 		},
 		link: function(scope, iElement, iAttrs, ctrl) {
 			scope.$watch('count', function(newVal, oldVal) {
-				console.log(newVal);
-				for (var i in scope.codeLeds) {
-					scope.codeLeds[i].on = (i < newVal);
-				}
+				angular.forEach(scope.leds, function(led, idx) {
+					led.on = (idx < newVal);
+				});
 			});
 		}
 	}

@@ -3,7 +3,7 @@
 	<div class="row-fluid">
 		<div class="col-xs-12 col-lg-offset-4 col-lg-4">
 			<label for="user">Benutzer</label>
-			<select id="user" class="form-control login-user" ng-change="checkLoginInfo()" ng-model="user" ng-disabled="!players.length || locked" ng-options="p as p.name for p in (players | active | orderBy: 'name')">
+			<select id="user" class="form-control login-user" ng-model="user" ng-disabled="!players.length" ng-options="p as p.name for p in (players | active | orderBy: 'name')">
 				<option value="">-- ausw&auml;hlen --</option>
 			</select>
 		</div>
@@ -11,21 +11,12 @@
 
 	<div class="row-fluid">
 		<div class="col-xs-12 col-lg-offset-4 col-lg-4 text-center login-leds">
-			<span ng-repeat="cl in codeLeds">
-				<i class="fa fa-3x"
-					ng-class="{'fa-circle-o': !cl.on, 'fa-circle': cl.on, 'text-primary': colorLed == 'default', 'text-success': colorLed == 'green', 'text-danger': colorLed == 'red'}"></i>
-			</span>
-		</div>
-	</div>
-
-	<div class="row-fluid">
-		<div class="col-xs-12 col-lg-offset-4 col-lg-4 text-center login-leds">
-			<km-ledbar size="maxDigits" count="pin.length"></km-ledbar>
+			<km-ledbar size="maxDigits" count="pin.length" color="colorLed"></km-ledbar>
 		</div>
 	</div>
 
 	<div class="row-fluid text-center">
-		<km-keypad size="maxDigits" ng-model="pin" ng-disabled="locked"></km-keypad>
+		<km-keypad size="maxDigits" ng-model="pin" ng-disabled="loading || (user === null)"></km-keypad>
 	</div>
 
 </div>

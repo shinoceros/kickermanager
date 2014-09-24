@@ -44,20 +44,18 @@ kmControllers.controller('PageCtrl', function ($scope, $state, AuthService) {
 	}
 });
 
-kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, Player, StorageService, AuthService) {
+kmControllers.controller('LoginCtrl', function($scope, $state, $stateParams, $timeout, Player, StorageService, AuthService) {
+	if (AuthService.isLoggedIn()) {
+		$state.go($stateParams.redirect || 'user.match');
+	}
 	$scope.$emit('setTitle', '');
 	$scope.user = null;
 	$scope.pin = '';
 	$scope.maxDigits = 5;
-	$scope.locked = false;
+	$scope.loading = false;
 	
-	$scope.codeLeds = [];
 	$scope.colorLed = 'default';
 	
-	for (var i = 0; i < $scope.maxDigits; ++i) {
-		$scope.codeLeds.push({id: i, on: false});
-	}
-		
 	// fetch all players
 	Player.query().$promise.then(
 		function (data) {
@@ -78,15 +76,10 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 		if ($scope.user !== null && $scope.pin.length == $scope.maxDigits) {
 			$scope.login();
 		}
-		for (var i in $scope.codeLeds) {
-			$scope.codeLeds[i].on = (i < newVal.length);
-		}
 	});
 	
 	$scope.login = function() {
-		$scope.locked = true;
-		// TODO: only for test purposes, later: store user id only if login successful
-		StorageService.set('userid', $scope.user.id);
+		$scope.loading = true;
 		AuthService.login($scope.user.id, $scope.pin).then( function(isSuccess) {
 			$scope.colorLed = (isSuccess ? 'green' : 'red');
 			$timeout(function() {
@@ -97,10 +90,10 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $sce, $timeout, P
 	
 	$scope.advance = function(isSuccess) {
 		$scope.pin = '';
-		$scope.locked = false;
+		$scope.loading = false;
 		$scope.colorLed = 'default';
 		if (isSuccess) {
-			$state.go('user.match');
+			$state.go($stateParams.redirect || 'user.match');
 		}	
 	}
 });
