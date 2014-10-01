@@ -130,30 +130,27 @@ kmControllers.controller('RankingCtrl', function($scope, Ranking, SessionService
 
 });
 
-kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Settings, History, Statistic, Player, SessionService) {
+kmControllers.controller('MatchCtrl', function($scope, $http, $filter, $sce, Match, Settings, History, Statistic, Player, SessionService) {
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
+	$scope.listModes = [
+		{ label: 'Ergebnisse', type: 'results', data: null },
+		{ label: 'Tag',        type: 'stats',   data: null },
+		{ label: 'Woche',      type: 'stats',   data: null }
+	];
 
-	$scope.statsMode = 'day';
-	$scope.dateOffset = 0;
-	$scope.dateFormatted = "";
+	angular.forEach($scope.listModes, function(listMode) {
+		listMode.label = $sce.trustAsHtml(listMode.label);
+	});
 	
-	$scope.getDate = function() {
-		var d = new Date();
-		var factor = ($scope.statsMode == 'week' ? 7 : 1);
-		d.setDate(d.getDate() + $scope.dateOffset * factor);
-		return d;
-	}
+	$scope.currentListMode = { item: $scope.listModes[0] };
 	
-	$scope.loadHistory = function() {
-		$scope.history = History.query({type:'today'});
-	}
-
-	$scope.loadStats = function() {
-		var d = $scope.getDate();
-		$scope.dateFormatted = $filter('stats')(d, $scope.dateOffset, $scope.statsMode);
-		$scope.stats = Statistic.query({type: $scope.statsMode, param: $filter('date')(d, 'yyyy-MM-dd')});
+	$scope.loadData = function() {
+		var d = $filter('date')(new Date(), 'yyyy-MM-dd');
+		$scope.listModes[0].data = History.query({type: 'date', param1: d})
+		$scope.listModes[1].data = Statistic.query({type: 'day', param: d})
+		$scope.listModes[2].data = Statistic.query({type: 'week', param: d});
 	}
 	
 	Settings.get().$promise.then(function(response) {
@@ -161,28 +158,13 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 		$scope.resetCtrl();
 	});
 
-	$scope.onChangeStatsMode = function() {
-		$scope.dateOffset = 0;
-		$scope.loadStats();
-	}
-	
-	$scope.addDateOffset = function(offset) {
-		var newDateOffset = $scope.dateOffset + offset;
-		// don't show future stats (which wouldn't make sense), show reload instead
-		if (newDateOffset <= 0) {
-			$scope.dateOffset = newDateOffset;
-		}
-		$scope.loadStats();
-	}
-
 	$scope.loadPlayers = function() {
 		Player.query().$promise.then(function(response) {
 			// index array for faster access
 			for (var i in response) {
 				$scope.players[response[i].id] = response[i];
 			}
-			$scope.loadHistory();
-			$scope.loadStats();
+			$scope.loadData();
 		});
 	}
 
@@ -241,8 +223,7 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, Match, Se
 				goals2: $scope.goals[1]
 			}).$promise.then(function(success) {
 				$scope.resetCtrl();
-				$scope.loadHistory();
-				$scope.loadStats();
+				$scope.loadData();
 			});
 		}
 		$scope.submitting = false;

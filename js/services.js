@@ -5,7 +5,7 @@ kmServices.factory('Settings', function($resource) {
 });
 
 kmServices.factory('Ranking', function($resource) {
-	return $resource('api/ranking/:mode?nocache=' + (new Date()).getTime(), {}, {
+	return $resource('api/ranking/:mode', {}, {
 		query:	{method:'GET', params: {mode: '@mode'}, isArray: true}
 	});
 });
@@ -31,7 +31,7 @@ kmServices.factory('History', function($resource) {
 });
 
 kmServices.factory('Statistic', function($resource) {
-	return $resource('api/stats/:type/:param?nocache=' + (new Date()).getTime());
+	return $resource('api/stats/:type/:param');
 });
 
 kmServices.factory('AuthService', function($resource, $q, SessionService, StorageService) {
