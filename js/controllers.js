@@ -132,9 +132,9 @@ angular
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
 	$scope.listModes = [
-		{ label: 'Ergebnisse', type: 'results', data: null },
-		{ label: 'Tag',        type: 'stats',   data: null },
-		{ label: 'Woche',      type: 'stats',   data: null }
+		{ id: 0, label: 'Ergebnisse', type: 'results', data: null },
+		{ id: 1, label: 'Tag',        type: 'stats',   data: null },
+		{ id: 2, label: 'Woche',      type: 'stats',   data: null }
 	];
 
 	angular.forEach($scope.listModes, function(listMode) {
