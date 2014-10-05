@@ -2,15 +2,15 @@
 
 /* Controllers */
 
-var kmControllers = angular.module('kmControllers', []);
-
-kmControllers.controller('PageCtrl', function ($scope, $state, AuthService) {
+angular
+.module('kmControllers', [])
+.controller('PageCtrl', function ($scope, $state, AuthService) {
 	$scope.tabs = [
 		{ link : 'user.match', label : 'Spiel', icon: 'edit' },
 		{ link : 'user.ranking', label : 'Tabelle', icon: 'trophy' },
 		{ link : 'user.statistics', label : 'Statistik', icon: 'bar-chart-o' },
-		{ link : 'user.playersetup', label : 'Spieler', icon: 'user' },
-		{ link : 'admin.administration', label : 'Administration', icon: 'cog' }
+		{ link : 'user.settings', label : 'Einstellungen', icon: 'cog' },
+		{ link : 'admin.main', label : 'Administration', icon: 'wrench' }
 	];
 	
 	angular.forEach($scope.tabs, function(item, idx) {
@@ -42,9 +42,8 @@ kmControllers.controller('PageCtrl', function ($scope, $state, AuthService) {
 			$state.go('anon.login');
 		});
 	}
-});
-
-kmControllers.controller('LoginCtrl', function($scope, $state, $stateParams, $timeout, Player, StorageService, AuthService) {
+})
+.controller('LoginCtrl', function($scope, $state, $stateParams, $timeout, Player, StorageService, AuthService) {
 	if (AuthService.isLoggedIn()) {
 		$state.go($stateParams.redirect || 'user.match');
 	}
@@ -96,9 +95,8 @@ kmControllers.controller('LoginCtrl', function($scope, $state, $stateParams, $ti
 			$state.go($stateParams.redirect || 'user.match');
 		}	
 	}
-});
-
-kmControllers.controller('RankingCtrl', function($scope, Ranking, SessionService) {
+})
+.controller('RankingCtrl', function($scope, Ranking, SessionService) {
 	$scope.$emit('setTitle', 'Tabelle');
 	$scope.rankingMode = 'total';
 	
@@ -128,9 +126,8 @@ kmControllers.controller('RankingCtrl', function($scope, Ranking, SessionService
 		return (gamesPlayed < exerciseLimit);
 	}
 
-});
-
-kmControllers.controller('MatchCtrl', function($scope, $http, $filter, $sce, Match, Settings, History, Statistic, Player, SessionService) {
+})
+.controller('MatchCtrl', function($scope, $http, $filter, $sce, Match, Settings, History, Statistic, Player, SessionService) {
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
@@ -232,9 +229,16 @@ kmControllers.controller('MatchCtrl', function($scope, $http, $filter, $sce, Mat
 	$scope.isCurrentUserId = function(id) {
 		return (id == SessionService.currentUser.id);
 	}
-});
-
-kmControllers.controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
+})
+.controller('UserSettingsCtrl', function($scope) {
+	$scope.$emit('setTitle', 'Einstellungen');
+	
+})
+.controller('UserChangePwCtrl', function($scope) {
+	$scope.$emit('setTitle', 'Passwort ändern');
+	
+})
+.controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
 	$scope.$emit('setTitle', 'Statistik');
 
 	Settings.get().$promise.then(function(response) {
@@ -306,24 +310,26 @@ kmControllers.controller('StatisticsCtrl', function($scope, $http, Settings, Pla
 			});
 		}
 	}
-});
-
-kmControllers.controller('PlayerSetupCtrl', function($scope, Player) {
-	$scope.$emit('setTitle', 'Spielerverwaltung');
+})
+.controller('AdminMainCtrl', function($scope) {
+	$scope.$emit('setTitle', 'Administration');
+})
+.controller('AdminPlayerSetupCtrl', function($scope, $sce, Admin, Player, PopupService) {
+	$scope.$emit('setTitle', 'Spieler verwalten');
 	$scope.selectedPlayer = null;
 	$scope.updating = false;
-	$scope.result = { text: '', error: false, icon: '' }
 
 	$scope.addPlayer = function() {
-		Player.save({name: $scope.newplayer}).$promise.then(
+		Admin.addPlayer({name: $scope.newplayer}).$promise.then(
 			function (response) {
-				$scope.result = {text: 'Spieler ' + response.name + ' erfolgreich hinzugefügt.', error: false }
+				var msg = 'Spieler <b>' + response.name + '</b> erfolgreich hinzugefügt.<br>Pin: <b>' + response.pin + '</b>';
+				PopupService.open(PopupService.TYPE.PT_SUCCESS, msg);
 				$scope.newplayer = "";
 				$scope.loadPlayers();
 			},
 			function (response) {
 				if (response.data.error) {
-					$scope.result = {text: response.data.error.text, error: true }
+					PopupService.open(PopupService.TYPE.PT_ERROR, response.data.error.text);
 				}
 			}
 		);
@@ -335,20 +341,35 @@ kmControllers.controller('PlayerSetupCtrl', function($scope, Player) {
 	
 	$scope.updatePlayer = function() {
 		$scope.updating = true;
-		Player.update({id: $scope.selectedPlayer.id, active: $scope.selectedPlayer.active}).$promise.then(
+		Admin.updatePlayer({id: $scope.selectedPlayer.id, active: $scope.selectedPlayer.active, role: $scope.selectedPlayer.role}).$promise.then(
 			function(success) {
 				$scope.updating = false;
 			},
 			function(error) {
-				console.log(error);
 				$scope.updating = false;
 			}
 		);
 	}
-});
-
-kmControllers.controller('AdministrationCtrl', function($scope, $filter, Player, Match, History) {
-	$scope.$emit('setTitle', 'Administration');
+	$scope.resetPin = function() {
+		Admin.resetPin({id: $scope.selectedPlayer.id}).$promise.then(
+			function (response) {
+				var name = '';
+				angular.forEach($scope.players, function(item) {
+					name = (item.id == response.id ? item.name : name);
+				});
+				var msg = 'Neuer Pin  für ' + name + ': <b>' + response.pin + '</b>';
+				PopupService.open(PopupService.TYPE.PT_SUCCESS, msg);
+			},
+			function (response) {
+				if (response.data.error) {
+					PopupService.open(PopupService.TYPE.PT_ERROR, response.data.error.text);
+				}
+			}
+		)
+	}
+})
+.controller('AdminMatchEditCtrl', function($scope, $filter, Player, Admin, History) {
+	$scope.$emit('setTitle', 'Ergebnisse bearbeiten');
 	
 	$scope.players = new Array();
 	$scope.date = new Date();
@@ -384,7 +405,7 @@ kmControllers.controller('AdministrationCtrl', function($scope, $filter, Player,
 	};
 
 	$scope.deleteMatch = function(match) {
-		Match.remove({matchId: match.id}).$promise.then(
+		Admin.deleteMatch({id: match.id}).$promise.then(
 			function(success) {
 				$scope.loadMatches();
 			},
@@ -395,4 +416,21 @@ kmControllers.controller('AdministrationCtrl', function($scope, $filter, Player,
 	};
 	
 	$scope.loadPlayers();
+})
+.controller('PopupCtrl', function($scope, $modalInstance, $sce, content) {
+
+	$scope.content = content;
+	
+	$scope.trust = function(text) {
+		return $sce.trustAsHtml(text);
+	}
+	
+	$scope.onClose = function() {
+		$modalInstance.close();
+	}
+
+	$scope.onDismiss = function() {
+		$modalInstance.dismiss();
+	}
+
 });

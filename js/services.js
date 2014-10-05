@@ -1,40 +1,40 @@
-var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage']);
-
-kmServices.factory('Settings', function($resource) {
+var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
+.factory('Settings', function($resource) {
 	return $resource('api/settings');
-});
-
-kmServices.factory('Ranking', function($resource) {
+})
+.factory('Ranking', function($resource) {
 	return $resource('api/ranking/:mode', {}, {
 		query:	{method:'GET', params: {mode: '@mode'}, isArray: true}
 	});
-});
-
-kmServices.factory('Player', function($resource) {
+})
+.factory('Player', function($resource) {
 	return $resource('api/player/:playerId', {}, {
 		query:	{method:'GET', params: {playerId: ''}, isArray: true},
 		post:	{method:'POST'},
 		update:	{method:'PUT', params: {playerId: '@playerId'}}
 	});
-});
-
-kmServices.factory('Match', function($resource) {
-	return $resource('api/match/:matchId', {}, {
-		post:	{method:'POST'},
-		update:	{method:'PUT', params: {matchId: '@matchId'}},
-		remove:	{method:'DELETE', params: {matchId: '@matchId'}}
+})
+.factory('Admin', function($resource) {
+	return $resource('api/admin/:cat/:id/:func', {}, {
+		addPlayer:		{method:'POST',   params: {cat: 'player'}},
+		updatePlayer:	{method:'PUT',    params: {cat: 'player'}},
+		resetPin:		{method:'GET',    params: {cat: 'player', func: 'resetpin'}},
+		updateMatch:	{method:'PUT',    params: {cat: 'match'}},
+		deleteMatch:	{method:'DELETE', params: {cat: 'match'}}
 	});
-});
-
-kmServices.factory('History', function($resource) {
+})
+.factory('Match', function($resource) {
+	return $resource('api/match/:matchId', {}, {
+		post:	{method:'POST'}
+	});
+})
+.factory('History', function($resource) {
 	return $resource('api/history/:type/:param1/:param2');
-});
-
-kmServices.factory('Statistic', function($resource) {
+})
+.factory('Statistic', function($resource) {
 	return $resource('api/stats/:type/:param');
-});
-
-kmServices.factory('AuthService', function($resource, $q, SessionService, StorageService) {
+})
+.factory('AuthService', function($resource, $q, SessionService, StorageService) {
 
 	var accessLevels = routingConfig.accessLevels
 		, userRoles = routingConfig.userRoles;
@@ -96,9 +96,8 @@ kmServices.factory('AuthService', function($resource, $q, SessionService, Storag
 			return p;
 		}
 	}
-});
-
-kmServices.factory('SessionService', function() {
+})
+.factory('SessionService', function() {
 	return {
 		currentUser: {
 			id: null,
@@ -106,9 +105,8 @@ kmServices.factory('SessionService', function() {
 			role: routingConfig.userRoles.public
 		}
 	};
-});
-
-kmServices.factory('StorageService', function($localStorage) {
+})
+.factory('StorageService', function($localStorage) {
 	var ls = $localStorage;
 	return {
 		get: function (key) {
@@ -117,6 +115,54 @@ kmServices.factory('StorageService', function($localStorage) {
 		
 		set: function (key, value) {
 			ls[key] = value;
+		}
+	}
+})
+.factory('PopupService', function($modal) {
+
+	var _type = {
+		PT_SUCCESS: 0,
+		PT_ERROR: 1,
+		PT_SELECT: 2
+	};
+	return {
+		TYPE: _type,
+		open: function(type, msg) {
+			var modalInstance = $modal.open({
+				templateUrl: 'partials/modal.message.html',
+				controller: 'PopupCtrl',
+				size: 'sm',
+				resolve: {
+					content: function () {
+						var c = {
+							dialogClass: '', iconClass: '', buttonClass: '', closeLabel: '', dismissLabel: '', msg: msg
+						};
+						if (type == _type.PT_ERROR) {
+							c.dialogClass  = 'alert-danger';
+							c.iconClass    = 'fa-warning';
+							c.buttonClass  = 'btn-danger';
+							c.closeLabel   = 'Schlie&szlig;en';
+							c.dismissLabel = '';
+						}
+						else if (type == _type.PT_SUCCESS) {
+							c.dialogClass  = 'alert-success';
+							c.iconClass    = 'fa-check';
+							c.buttonClass  = 'btn-success';
+							c.closeLabel   = 'Schlie&szlig;en';
+							c.dismissLabel = '';
+						}
+						else if (type == _type.PT_SELECT) {
+							c.dialogClass  = 'alert-warning';
+							c.iconClass    = 'fa-question';
+							c.buttonClass  = 'btn-warning';
+							c.closeLabel   = 'Ja';
+							c.dismissLabel = 'Nein';
+						}
+						return c;
+					}
+				}
+			});
+			return modalInstance.result;
 		}
 	}
 });

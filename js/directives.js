@@ -1,10 +1,19 @@
 var kmDirectives = angular.module('kmDirectives', []);
 
-kmDirectives.directive('ngReallyClick', [function() {
+kmDirectives.directive('ngReallyClick', function(PopupService) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs) {
 			element.bind('click', function() {
+				var message = attrs.ngReallyMessage;
+/* 				if (message) {
+					PopupService.open(PopupService.TYPE.PT_SELECT, message).then(
+						function() {
+							scope.$apply(attrs.ngReallyClick);
+						}
+					);
+				}
+ */
 				var message = attrs.ngReallyMessage;
 				if (message && confirm(message)) {
 					scope.$apply(attrs.ngReallyClick);
@@ -12,7 +21,7 @@ kmDirectives.directive('ngReallyClick', [function() {
 			});
 		}
 	}
-}]);
+});
 
 kmDirectives.directive('kmKeypad', function() {
 	return {

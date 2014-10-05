@@ -49,6 +49,16 @@ var kmApp = angular.module('kmApp', [
 			templateUrl: 'partials/match.html',
 			controller: 'MatchCtrl'
 		})
+		.state('user.settings', {
+			url: '/usersettings',
+			templateUrl: 'partials/user.settings.html',
+			controller: 'UserSettingsCtrl'
+		})
+		.state('user.changepw', {
+			url: '/changepw',
+			templateUrl: 'partials/user.changepw.html',
+			controller: 'UserChangePwCtrl'
+		})
 		.state('user.ranking', {
 			url: '/ranking',
 			templateUrl: 'partials/ranking.html',
@@ -63,26 +73,32 @@ var kmApp = angular.module('kmApp', [
 			url: '/elotrend',
 			templateUrl: 'partials/statistics.elotrend.html',
 			controller: 'StatisticsCtrl'
-		})
-		.state('user.playersetup', {
-			url: '/playersetup',
-			templateUrl: 'partials/playersetup.html',
-			controller: 'PlayerSetupCtrl'
 		});
 
 	// admin routes
 	$stateProvider
 		.state('admin' , {
 			abstract: true,
+			url: '/admin',
 			template: '<ui-view/>',
 			data: {
 				access: access.admin
 			}
 		})
-		.state('admin.administration', {
-			url: '/administration',
-			templateUrl: 'partials/administration.html',
-			controller: 'AdministrationCtrl'
+		.state('admin.main', {
+			url: '/',
+			templateUrl: 'partials/admin.main.html',
+			controller: 'AdminMainCtrl'
+		})
+		.state('admin.playersetup', {
+			url: '/playersetup',
+			templateUrl: 'partials/admin.playersetup.html',
+			controller: 'AdminPlayerSetupCtrl'
+		})
+		.state('admin.matchedit', {
+			url: '/matchedit',
+			templateUrl: 'partials/admin.matchedit.html',
+			controller: 'AdminMatchEditCtrl'
 		});
 		
 	$httpProvider.interceptors.push(function($q, $injector) {

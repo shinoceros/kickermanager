@@ -78,4 +78,13 @@
       
 		return $deltaElo;
 	}
-	?>
+	
+	function GenerateRandomPin() 
+	{
+		$arrayChars = range(0, 9);
+		shuffle($arrayChars);
+		$sarrayChars = array_slice($arrayChars, 0, 5);
+    	return implode($sarrayChars);
+	}
+
+?>

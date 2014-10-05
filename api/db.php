@@ -41,7 +41,7 @@
 
 		public function GetPlayers($method = 'default')
 		{
-			$query = "SELECT `id`, `name`, `active` FROM `players`";
+			$query = "SELECT `id`, `name`, `active`, `role` FROM `players`";
 			return $this->FillResultArray($query, $method);
 		}
 
@@ -213,36 +213,49 @@
 			return $this->mysqli->insert_id;
 		}
 
-		public function AddPlayer($player)
+		public function AddPlayer(&$player)
 		{
 			$query = sprintf("SELECT * FROM `players` WHERE `name` = '%s'",
 						$player['name']);
 			$result = $this->mysqli->query($query);
 			if (0 != $result->num_rows)
 			{
-				throw new Exception('Spieler '.$player['name'].' existiert bereits!');
+				throw new Exception('E_USER_NAME_TAKEN');
 			}
-			$query = sprintf("INSERT INTO `players` (`name`, `active`) VALUES ('%s', 1)",
-						$player['name']);
-			$result = $this->mysqli->query($query);
-			return $this->mysqli->insert_id;
+			// CREATE
+			$pin = GenerateRandomPin();
+			$query = sprintf("INSERT INTO `players` (`name`, `active`, `pwd_hash`, `role`) VALUES ('%s', 1, MD5(%s), 'user')",
+						$player['name'],
+						$pin);
+			$this->mysqli->query($query);
+			// update player info
+			$player['id'] = $this->mysqli->insert_id;
+			$player['pin'] = $pin;
 		}
 		
-		public function UpdatePlayerPassword($player, $pin)
+		public function UpdateUserPin(&$user)
 		{
-			$query = sprintf("UPDATE `players` SET `pwd_hash`='%s' WHERE `id` = %d", md5($pin), $player['id']);
+			$pin = GenerateRandomPin();
+			$query = sprintf("UPDATE `players` SET `pwd_hash` = '%s' WHERE `id` = %d", MD5($pin), $user['id']);
 			$this->mysqli->query($query);
+			
+			if (0 == $this->mysqli->affected_rows)
+			{
+				throw new Exception('E_INVALID_ID');
+			}
+			$user['pin'] = $pin;
 		}
 
-		public function UpdatePlayer($player)
+		public function UpdatePlayer(&$player)
 		{
-			$query = sprintf("UPDATE `players` SET `active` = %d WHERE `id` = %d",
+			$query = sprintf("UPDATE `players` SET `active` = %d, `role` = '%s' WHERE `id` = %d",
 						$player['active'],
+						$player['role'],
 						$player['id']);
-			$result = $this->mysqli->query($query);
-			if (1 != $this->mysqli->affected_rows)
+			$this->mysqli->query($query);
+			if (0 == $this->mysqli->affected_rows)
 			{
-				throw new Exception('Spieler existiert nicht!');
+				throw new Exception('E_INVALID_ID');
 			}
 			return $player;
 		}

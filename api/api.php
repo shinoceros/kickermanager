@@ -175,19 +175,6 @@
 		}
 	});
 	
-	// add new player
-	$app->post('/player', function() use ($app) {
-		$request = $app->request();
-		$player = json_decode($request->getBody(), true);
-		try {
-			$db = DB::GetInstance();
-			$player['id'] = $db->AddPlayer($player);
-			echo json_encode_utf8($player, true);
-		} catch(Exception $e) {
-			HandleError($e);
-		}
-	});
-
 	// login / logout
 	$app->post('/auth/:action', function($action) use ($app, $am) {
 		$request = $app->request();
@@ -221,22 +208,48 @@
 		echo json_encode_utf8($userData);
 	});
 	
-	// PUT ROUTES
-	// update player
-	$app->put('/player', function () use ($app) {
+	// ADMIN ROUTES
+
+	// add new player
+	$app->post('/admin/player', function() use ($app) {
+		$request = $app->request();
+		$player = json_decode($request->getBody(), true);
 		try {
-			$request = $app->request();
-			$player = json_decode($request->getBody(), true);
 			$db = DB::GetInstance();
-			$player = $db->UpdatePlayer($player);
+			$db->AddPlayer($player);
+			echo json_encode_utf8($player, true);
+		} catch(Exception $e) {
+			HandleError($e);
+		}
+	});
+
+	// update player
+	$app->put('/admin/player', function () use ($app) {
+		$request = $app->request();
+		$player = json_decode($request->getBody(), true);
+		try {
+			$db = DB::GetInstance();
+			$db->UpdatePlayer($player);
 			echo json_encode_utf8($player);
 		} catch(Exception $e) {
 			HandleError($e);
 		}
 	});
 
+	// reset user pin
+	$app->get('/admin/player/:userid/resetpin', function ($userid) {
+		try {
+			$db = DB::GetInstance();
+			$user = array('id' => $userid);
+			$db->UpdateUserPin($user);
+			echo json_encode_utf8($user);
+		} catch(Exception $e) {
+			HandleError($e);
+		}
+	});
+	
 	// update match
-	$app->put('/match', function() use ($app) {
+	$app->put('/admin/match', function() use ($app) {
 		try {
 			$request = $app->request();
 			$match = json_decode($request->getBody(), true);
@@ -247,8 +260,8 @@
 		}
 	});
 
-	// DELETE ROUTES
-	$app->delete('/match/:matchId', function($matchId) {
+	// delete match
+	$app->delete('/admin/match/:matchId', function($matchId) {
 		try {
 			$db = DB::GetInstance();
 			$db->DeleteMatch($matchId);

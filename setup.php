@@ -125,7 +125,7 @@
 		{
 			while($row = $result->fetch_array(MYSQLI_ASSOC))
 			{
-				$newPin[$row['name']] = $this->GenerateRandomPin();
+				$newPin[$row['name']] = GenerateRandomPin();
 				$tmpHash = md5($newPin[$row['name']]);
 				$userId = $row['id'];
 				$this->db->query("UPDATE players SET pwd_hash=IFNULL(pwd_hash, '$tmpHash') WHERE id='$userId'");
@@ -148,16 +148,6 @@
 		{
 			echo "... nothing to do</pre> ";
 		}
-	}
-
-	// =======================================================================
-
-	private function GenerateRandomPin() 
-	{
-		$arrayChars = range(0, 9);
-		shuffle($arrayChars);
-		$sarrayChars = array_slice($arrayChars, 0, 5);
-    		return implode( $sarrayChars );
 	}
 
 	// =======================================================================
