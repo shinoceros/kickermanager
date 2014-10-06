@@ -122,47 +122,65 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 
 	var _type = {
 		PT_SUCCESS: 0,
-		PT_ERROR: 1,
-		PT_SELECT: 2
+		PT_ERROR:   1,
+		PT_SELECT:  2
 	};
+	
+	var _createContent = function(type, msg) {
+		var c = {
+			dialogClass: '',
+			iconClass: '',
+			buttonClass: '',
+			closeLabel: '',
+			dismissLabel: '',
+			msg: msg
+		};
+		switch (type) {
+			case _type.PT_ERROR:
+				c.dialogClass  = 'alert-danger';
+				c.iconClass    = 'fa-warning';
+				c.buttonClass  = 'btn-danger';
+				c.closeLabel   = 'OK';
+				c.dismissLabel = '';
+				break;
+			case _type.PT_SUCCESS:
+				c.dialogClass  = 'alert-success';
+				c.iconClass    = 'fa-check';
+				c.buttonClass  = 'btn-success';
+				c.closeLabel   = 'OK';
+				c.dismissLabel = '';
+				break;
+			case _type.PT_SELECT:
+				c.dialogClass  = 'alert-warning';
+				c.iconClass    = 'fa-question';
+				c.buttonClass  = 'btn-warning';
+				c.closeLabel   = 'Ja';
+				c.dismissLabel = 'Nein';
+				break;
+		}
+		return c;
+	}
+	
 	return {
 		TYPE: _type,
 		open: function(type, msg) {
-			var modalInstance = $modal.open({
+			var modalOptions = {
 				templateUrl: 'partials/modal.message.html',
-				controller: 'PopupCtrl',
-				size: 'sm',
-				resolve: {
-					content: function () {
-						var c = {
-							dialogClass: '', iconClass: '', buttonClass: '', closeLabel: '', dismissLabel: '', msg: msg
-						};
-						if (type == _type.PT_ERROR) {
-							c.dialogClass  = 'alert-danger';
-							c.iconClass    = 'fa-warning';
-							c.buttonClass  = 'btn-danger';
-							c.closeLabel   = 'Schlie&szlig;en';
-							c.dismissLabel = '';
-						}
-						else if (type == _type.PT_SUCCESS) {
-							c.dialogClass  = 'alert-success';
-							c.iconClass    = 'fa-check';
-							c.buttonClass  = 'btn-success';
-							c.closeLabel   = 'Schlie&szlig;en';
-							c.dismissLabel = '';
-						}
-						else if (type == _type.PT_SELECT) {
-							c.dialogClass  = 'alert-warning';
-							c.iconClass    = 'fa-question';
-							c.buttonClass  = 'btn-warning';
-							c.closeLabel   = 'Ja';
-							c.dismissLabel = 'Nein';
-						}
-						return c;
+				controller: function($scope, $modalInstance, $sce) {
+					$scope.content = _createContent(type, msg);
+					$scope.trust = function(text) {
+						return $sce.trustAsHtml(text);
 					}
-				}
-			});
-			return modalInstance.result;
+					$scope.onClose = function() {
+						$modalInstance.close();
+					}
+					$scope.onDismiss = function() {
+						$modalInstance.dismiss();
+					}
+				},
+				size: 'sm',
+			};
+			return $modal.open(modalOptions).result;
 		}
 	}
 });

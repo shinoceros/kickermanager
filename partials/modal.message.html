@@ -1,10 +1,10 @@
-<div class="alert" ng-class="content.dialogClass" style="margin-bottom: 0 !important">
+<div ng-class="content.dialogClass">
 	<div class="modal-body">
-		<i class="fa fa-2x" ng-class="content.iconClass"></i>
+		<i class="fa fa-2x" ng-class="content.iconClass" style="float: left; margin-right: 20px;"></i>
 		<span ng-bind-html="trust(content.msg)"></span>
 	</div>
 	<div class="modal-footer">
+		<button class="btn" ng-if="content.dismissLabel != ''" ng-click="onDismiss()" ng-bind-html="trust(content.dismissLabel)"></button>
 		<button class="btn" ng-class="content.buttonClass" ng-click="onClose()" ng-bind-html="trust(content.closeLabel)"></button>
-		<button class="btn" ng-if="content.dismissLabel != ''" ng-class="content.buttonClass" ng-click="onDismiss()" ng-bind-html="trust(content.dismissLabel)"></button>
 	</div>
 </div>

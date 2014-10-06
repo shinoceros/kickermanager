@@ -72,20 +72,7 @@
 		</div>
 	</div>
 
-	<div class="row mySlideAnimation" ng-if="!currentListMode.item.data.$resolved">
-		<div class="col-xs-12">
-			<div id="fountainG" style="margin:auto">
-				<div id="fountainG_1" class="fountainG"></div>
-				<div id="fountainG_2" class="fountainG"></div>
-				<div id="fountainG_3" class="fountainG"></div>
-				<div id="fountainG_4" class="fountainG"></div>
-				<div id="fountainG_5" class="fountainG"></div>
-				<div id="fountainG_6" class="fountainG"></div>
-				<div id="fountainG_7" class="fountainG"></div>
-				<div id="fountainG_8" class="fountainG"></div>
-			</div>
-		</div>
-	</div>
+	<km-loading ng-if="!currentListMode.item.data.$resolved"></km-loading>
 	
 	<!-- match results table -->
 	<div class="row" ng-if="currentListMode.item.type == 'results' && currentListMode.item.data.$resolved">

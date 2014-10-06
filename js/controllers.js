@@ -12,31 +12,31 @@ angular
 		{ link : 'user.settings', label : 'Einstellungen', icon: 'cog' },
 		{ link : 'admin.main', label : 'Administration', icon: 'wrench' }
 	];
-	
+
 	angular.forEach($scope.tabs, function(item, idx) {
 		item.show = false;
 	});
-    
+
 	$scope.isCollapsed = true;
-	
+
 	$scope.collapse = function() {
 		$scope.isCollapsed = true;
 	}
-	
+
 	$scope.$on('setTitle', function(event, title) {
 		event.stopPropagation();
 		$scope.title = title;
 	});
-	
+
 	$scope.loggedIn = false;
-	
+
 	$scope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
 		angular.forEach($scope.tabs, function(tab, idx) {
 			tab.show = AuthService.authorize($state.get(tab.link).data.access);
 		});
 		$scope.loggedIn = AuthService.isLoggedIn();
 	});
-	
+
 	$scope.logout = function() {
 		AuthService.logout().then(function success() {
 			$state.go('anon.login');
@@ -52,9 +52,9 @@ angular
 	$scope.pin = '';
 	$scope.maxDigits = 5;
 	$scope.loading = false;
-	
+
 	$scope.colorLed = 'default';
-	
+
 	// fetch all players
 	Player.query().$promise.then(
 		function (data) {
@@ -70,13 +70,13 @@ angular
 			}
 		}
 	);
-	
+
 	$scope.$watch('pin', function(newVal, oldVal) {
 		if ($scope.user !== null && $scope.pin.length == $scope.maxDigits) {
 			$scope.login();
 		}
 	});
-	
+
 	$scope.login = function() {
 		$scope.loading = true;
 		AuthService.login($scope.user.id, $scope.pin).then( function(isSuccess) {
@@ -86,32 +86,32 @@ angular
 			}, 1500);
 		});
 	}
-	
+
 	$scope.advance = function(isSuccess) {
 		$scope.pin = '';
 		$scope.loading = false;
 		$scope.colorLed = 'default';
 		if (isSuccess) {
 			$state.go($stateParams.redirect || 'user.match');
-		}	
+		}
 	}
 })
 .controller('RankingCtrl', function($scope, Ranking, SessionService) {
 	$scope.$emit('setTitle', 'Tabelle');
 	$scope.rankingMode = 'total';
-	
+
 	$scope.loadRanking = function() {
 		$scope.ranking = Ranking.query({mode: $scope.rankingMode});
 	}
 
 	$scope.loadRanking();
-	
+
 	$scope.onChangeRankingMode = function() {
 		$scope.loadRanking();
 	}
 
 	$scope.players = null;
-	
+
 	$scope.hasPlayed = function(r) {
 		return r.total > 0;
 	}
@@ -140,16 +140,16 @@ angular
 	angular.forEach($scope.listModes, function(listMode) {
 		listMode.label = $sce.trustAsHtml(listMode.label);
 	});
-	
+
 	$scope.currentListMode = { item: $scope.listModes[0] };
-	
+
 	$scope.loadData = function() {
 		var d = $filter('date')(new Date(), 'yyyy-MM-dd');
 		$scope.listModes[0].data = History.query({type: 'date', param1: d})
 		$scope.listModes[1].data = Statistic.query({type: 'day', param: d})
 		$scope.listModes[2].data = Statistic.query({type: 'week', param: d});
 	}
-	
+
 	Settings.get().$promise.then(function(response) {
 		$scope.settings = response;
 		$scope.resetCtrl();
@@ -175,7 +175,7 @@ angular
 		$scope.invalidGoals = false;
 		$scope.validated = false;
 	}
-	
+
 	$scope.hasDuplicate = function(p) {
 		var c = 0;
 		for (var i in $scope.selectedPlayer) {
@@ -183,7 +183,7 @@ angular
 		}
 		return c > 1;
 	}
-	
+
 	$scope.validateForm = function(force) {
 
 		// skip validation if not forced (on submitting) and not validated
@@ -191,7 +191,7 @@ angular
 		{
 			return true;
 		}
-			
+
 		for (var i = 0; i < $scope.selectedPlayer.length; ++i)
 		{
 			var p = $scope.selectedPlayer[i];
@@ -200,14 +200,14 @@ angular
 		var isMax0 = ($scope.goals[0] == $scope.settings.maxGoals);
 		var isMax1 = ($scope.goals[1] == $scope.settings.maxGoals);
 		$scope.invalidGoals = (isMax0 && isMax1) || (!isMax0 && !isMax1);
-		
+
 		$scope.validated = true;
 		return ($scope.invalidPlayer.indexOf(true) == -1) && (!$scope.invalidGoals);
 	}
-	
+
 	$scope.submitForm = function() {
 		$scope.submitting = true;
-		
+
 		// all valid
 		if ($scope.validateForm(true))
 		{
@@ -225,18 +225,18 @@ angular
 		}
 		$scope.submitting = false;
 	};
-	
+
 	$scope.isCurrentUserId = function(id) {
 		return (id == SessionService.currentUser.id);
 	}
 })
 .controller('UserSettingsCtrl', function($scope) {
 	$scope.$emit('setTitle', 'Einstellungen');
-	
+
 })
 .controller('UserChangePwCtrl', function($scope) {
-	$scope.$emit('setTitle', 'Passwort ändern');
-	
+	$scope.$emit('setTitle', 'Passwort &auml;ndern');
+
 })
 .controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
 	$scope.$emit('setTitle', 'Statistik');
@@ -284,14 +284,14 @@ angular
 			}
 		};
 	});
-		
+
 	Player.query().$promise.then(function(response) {
 		$scope.players = $filter('active')(response);
 	});
-	
+
 	$scope.player1 = null;
 	$scope.player2 = null;
-	
+
 	$scope.loadData = function() {
 		if ($scope.player1 != null) {
 			var playerString = "" + $scope.player1;
@@ -322,7 +322,7 @@ angular
 	$scope.addPlayer = function() {
 		Admin.addPlayer({name: $scope.newplayer}).$promise.then(
 			function (response) {
-				var msg = 'Spieler <b>' + response.name + '</b> erfolgreich hinzugefügt.<br>Pin: <b>' + response.pin + '</b>';
+				var msg = 'Spieler <b>' + response.name + '</b> hinzugef&uuml;gt. Pin: <b>' + response.pin + '</b>';
 				PopupService.open(PopupService.TYPE.PT_SUCCESS, msg);
 				$scope.newplayer = "";
 				$scope.loadPlayers();
@@ -338,7 +338,7 @@ angular
 		$scope.players = Player.query();
 	};
 	$scope.loadPlayers();
-	
+
 	$scope.updatePlayer = function() {
 		$scope.updating = true;
 		Admin.updatePlayer({id: $scope.selectedPlayer.id, active: $scope.selectedPlayer.active, role: $scope.selectedPlayer.role}).$promise.then(
@@ -351,29 +351,30 @@ angular
 		);
 	}
 	$scope.resetPin = function() {
-		Admin.resetPin({id: $scope.selectedPlayer.id}).$promise.then(
-			function (response) {
-				var name = '';
-				angular.forEach($scope.players, function(item) {
-					name = (item.id == response.id ? item.name : name);
-				});
-				var msg = 'Neuer Pin  für ' + name + ': <b>' + response.pin + '</b>';
-				PopupService.open(PopupService.TYPE.PT_SUCCESS, msg);
-			},
-			function (response) {
-				if (response.data.error) {
-					PopupService.open(PopupService.TYPE.PT_ERROR, response.data.error.text);
-				}
+		var name = $scope.selectedPlayer.name;
+		PopupService.open(PopupService.TYPE.PT_SELECT, 'Soll die PIN f&uuml;r <b>' + name + '</b> wirklich ge&auml;ndert werden?').then(
+			function() {
+				Admin.resetPin({id: $scope.selectedPlayer.id}).$promise.then(
+					function (response) {
+						var msg = 'Neuer Pin f&uuml;r ' + name + ': <b>' + response.pin + '</b>';
+						PopupService.open(PopupService.TYPE.PT_SUCCESS, msg);
+					},
+					function (response) {
+						if (response.data.error) {
+							PopupService.open(PopupService.TYPE.PT_ERROR, response.data.error.text);
+						}
+					}
+				)
 			}
-		)
+		);
 	}
 })
-.controller('AdminMatchEditCtrl', function($scope, $filter, Player, Admin, History) {
+.controller('AdminMatchEditCtrl', function($scope, $filter, Player, Admin, History, PopupService) {
 	$scope.$emit('setTitle', 'Ergebnisse bearbeiten');
-	
+
 	$scope.players = new Array();
 	$scope.date = new Date();
-		
+
 	$scope.loadPlayers = function() {
 		Player.query().$promise.then(function(response) {
 			// index array for faster access
@@ -389,12 +390,12 @@ angular
 			$scope.history = response;
 		});
 	};
-	
+
 	$scope.prevDate = function() {
 		$scope.date.setDate($scope.date.getDate() - 1);
 		$scope.loadMatches();
 	}
-	
+
 	$scope.nextDate = function() {
 		$scope.date.setDate($scope.date.getDate() + 1);
 		$scope.loadMatches();
@@ -405,32 +406,19 @@ angular
 	};
 
 	$scope.deleteMatch = function(match) {
-		Admin.deleteMatch({id: match.id}).$promise.then(
-			function(success) {
-				$scope.loadMatches();
-			},
-			function (error) {
-				console.log(error);
+		PopupService.open(PopupService.TYPE.PT_SELECT, 'Soll das Ergebnis wirklich gel&ouml;scht werden?').then(
+			function() {
+				Admin.deleteMatch({id: match.id}).$promise.then(
+					function(success) {
+						$scope.loadMatches();
+					},
+					function (error) {
+						console.log(error);
+					}
+				);
 			}
-		);
+		)
 	};
-	
+
 	$scope.loadPlayers();
-})
-.controller('PopupCtrl', function($scope, $modalInstance, $sce, content) {
-
-	$scope.content = content;
-	
-	$scope.trust = function(text) {
-		return $sce.trustAsHtml(text);
-	}
-	
-	$scope.onClose = function() {
-		$modalInstance.close();
-	}
-
-	$scope.onDismiss = function() {
-		$modalInstance.dismiss();
-	}
-
 });

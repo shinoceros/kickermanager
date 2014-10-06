@@ -1,29 +1,5 @@
-var kmDirectives = angular.module('kmDirectives', []);
-
-kmDirectives.directive('ngReallyClick', function(PopupService) {
-	return {
-		restrict: 'A',
-		link: function(scope, element, attrs) {
-			element.bind('click', function() {
-				var message = attrs.ngReallyMessage;
-/* 				if (message) {
-					PopupService.open(PopupService.TYPE.PT_SELECT, message).then(
-						function() {
-							scope.$apply(attrs.ngReallyClick);
-						}
-					);
-				}
- */
-				var message = attrs.ngReallyMessage;
-				if (message && confirm(message)) {
-					scope.$apply(attrs.ngReallyClick);
-				}
-			});
-		}
-	}
-});
-
-kmDirectives.directive('kmKeypad', function() {
+angular.module('kmDirectives', [])
+.directive('kmKeypad', function() {
 	return {
 		restrict: 'E',
 		require: '^ngModel',
@@ -71,9 +47,8 @@ kmDirectives.directive('kmKeypad', function() {
 		link: function(scope, iElement, iAttrs, ctrl) {	
 		}
 	}
-});
-
-kmDirectives.directive('kmLedbar', function() {
+})
+.directive('kmLedbar', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -97,4 +72,14 @@ kmDirectives.directive('kmLedbar', function() {
 			});
 		}
 	}
-});
+})
+.directive('kmLoading', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		templateUrl: 'partials/loading.html',
+		link: function(scope, iElement, iAttrs, ctrl) {
+		}
+	}
+})
+;
