@@ -90,6 +90,11 @@ var kmApp = angular.module('kmApp', [
 			templateUrl: 'partials/admin.main.html',
 			controller: 'AdminMainCtrl'
 		})
+		.state('admin.gamesetup', {
+			url: '/gamesetup',
+			templateUrl: 'partials/admin.gamesetup.html',
+			controller: 'AdminGameSetupCtrl'
+		})
 		.state('admin.playersetup', {
 			url: '/playersetup',
 			templateUrl: 'partials/admin.playersetup.html',

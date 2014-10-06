@@ -20,7 +20,8 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 		updatePlayer:	{method:'PUT',    params: {cat: 'player'}},
 		resetPin:		{method:'GET',    params: {cat: 'player', func: 'resetpin'}},
 		updateMatch:	{method:'PUT',    params: {cat: 'match'}},
-		deleteMatch:	{method:'DELETE', params: {cat: 'match'}}
+		deleteMatch:	{method:'DELETE', params: {cat: 'match'}},
+		startNewSeason:	{method:'GET',    params: {cat: 'game', func: 'startnewseason'}}
 	});
 })
 .factory('Match', function($resource) {

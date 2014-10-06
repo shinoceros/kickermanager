@@ -247,6 +247,16 @@
 			HandleError($e);
 		}
 	});
+
+	// start new season
+	$app->get('/admin/game/startnewseason', function () {
+		try {
+			$db = DB::GetInstance();
+			$db->StartNewSeason();
+		} catch(Exception $e) {
+			HandleError($e);
+		}
+	});
 	
 	// update match
 	$app->put('/admin/match', function() use ($app) {

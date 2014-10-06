@@ -314,6 +314,29 @@ angular
 .controller('AdminMainCtrl', function($scope) {
 	$scope.$emit('setTitle', 'Administration');
 })
+.controller('AdminGameSetupCtrl', function($scope, Settings, Admin, PopupService) {
+	$scope.$emit('setTitle', 'Spieloptionen');
+	$scope.settings = Settings.get();
+	
+	$scope.startNewSeason = function() {
+		PopupService.open(PopupService.TYPE.PT_SELECT, 'Neue Saison jetzt starten?').then(
+			function() {
+				Admin.startNewSeason().$promise.then(
+					function (response) {
+						var msg = 'Neue Saison gestartet! Yeah!';
+						PopupService.open(PopupService.TYPE.PT_SUCCESS, msg);
+						$scope.settings = Settings.get();
+					},
+					function (response) {
+						if (response.data.error) {
+							PopupService.open(PopupService.TYPE.PT_ERROR, response.data.error.text);
+						}
+					}
+				)
+			}
+		);
+	}
+})
 .controller('AdminPlayerSetupCtrl', function($scope, $sce, Admin, Player, PopupService) {
 	$scope.$emit('setTitle', 'Spieler verwalten');
 	$scope.selectedPlayer = null;

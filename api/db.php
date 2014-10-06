@@ -298,6 +298,12 @@
 			$this->UpdateDeltaELOForMatches($matchToDelete['season'], $matchToDelete['timestamp']);
 		}
 
+		public function StartNewSeason()
+		{
+			$query = "UPDATE `settings` SET `value` = `value` + 1 WHERE `key` = \"currentSeason\"";
+			$this->mysqli->query($query);
+		}
+		
 		//************************ PRIVATE METHODS ***************************
 
 		private function FillResultArray($query, $method = 'default')
