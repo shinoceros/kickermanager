@@ -207,6 +207,19 @@
 		}
 		echo json_encode_utf8($userData);
 	});
+
+	// change PIN
+	$app->post('/usersettings/changepin', function() use ($app, $am) {
+		$request = $app->request();
+		$userData = $am->getUserData();
+		$data = json_decode($request->getBody(), true);
+		try {
+			$db = DB::GetInstance();
+			$db->ChangeUserPin($userData['id'], $data['oldpin'], $data['newpin']);
+		} catch(Exception $e) {
+			HandleError($e);
+		}
+	});
 	
 	// ADMIN ROUTES
 
@@ -241,7 +254,7 @@
 		try {
 			$db = DB::GetInstance();
 			$user = array('id' => $userid);
-			$db->UpdateUserPin($user);
+			$db->ResetUserPin($user);
 			echo json_encode_utf8($user);
 		} catch(Exception $e) {
 			HandleError($e);

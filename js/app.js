@@ -54,10 +54,10 @@ var kmApp = angular.module('kmApp', [
 			templateUrl: 'partials/user.settings.html',
 			controller: 'UserSettingsCtrl'
 		})
-		.state('user.changepw', {
-			url: '/changepw',
-			templateUrl: 'partials/user.changepw.html',
-			controller: 'UserChangePwCtrl'
+		.state('user.changepin', {
+			url: '/changepin',
+			templateUrl: 'partials/user.changepin.html',
+			controller: 'UserChangePinCtrl'
 		})
 		.state('user.ranking', {
 			url: '/ranking',

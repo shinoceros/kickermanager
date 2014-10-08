@@ -1,0 +1,24 @@
+<div class="container-fluid">
+
+	<div class="row">
+		<div class="col-xs-12 text-right">
+			<a ui-sref="^.settings"><button type="button" class="btn btn-primary"><i class="fa fa-level-up"></i></button></a>
+			<br><br>
+		</div>
+	</div>
+
+	<div class="row-fluid text-center">
+		<h4 ng-bind-html="current.msg"></h4>
+	</div>
+
+	<div class="row-fluid">
+		<div class="col-xs-12 col-lg-offset-4 col-lg-4 text-center login-leds">
+			<km-ledbar size="maxDigits" count="current.pin.length" color="colorLed"></km-ledbar>
+		</div>
+	</div>
+
+	<div class="row-fluid text-center">
+		<km-keypad size="maxDigits" ng-model="current.pin" ng-disabled="loading"></km-keypad>
+	</div>
+
+</div>

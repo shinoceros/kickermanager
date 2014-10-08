@@ -35,15 +35,36 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 .factory('Statistic', function($resource) {
 	return $resource('api/stats/:type/:param');
 })
+.factory('UserSettings', function($resource, $q) {
+	var _r = $resource('api/usersettings/:action', {}, {
+		changePin: {method:'POST', params: {action: 'changepin'}}
+	});
+	return {
+		changePin: function(oldPin, newPin) {
+			var deferred = $q.defer();
+			var p = deferred.promise;
+			
+ 			_r.changePin({oldpin: oldPin, newpin: newPin}).$promise.then(
+				function success(res) {
+					deferred.resolve();
+				},
+				function error(res) {
+					deferred.reject();
+				}
+			);
+			return p;
+		}
+	}
+})
 .factory('AuthService', function($resource, $q, SessionService, StorageService) {
 
 	var accessLevels = routingConfig.accessLevels
 		, userRoles = routingConfig.userRoles;
 
 	var _r = $resource('api/auth/:action', {}, {
-		login:	{method:'POST', params: {action: 'login'}},
-		logout:	{method:'POST', params: {action: 'logout'}},
-		check:  {method:'GET',  params: {action: 'check'}}
+		login:	   {method:'POST', params: {action: 'login'}},
+		logout:	   {method:'POST', params: {action: 'logout'}},
+		check:     {method:'GET',  params: {action: 'check'}}
 	});
 	
 	return {
@@ -58,15 +79,17 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 			var deferred = $q.defer();
 			var p = deferred.promise;
 			
- 			_r.login({userId: userId, pin: pin}).$promise.then(function success(res) {
-				SessionService.currentUser = {id: res.id, name: res.name, role: userRoles[res.role]};
-				StorageService.set('userid', res.id);
-				deferred.resolve(true);
-			},
-			function error(res) {
-				SessionService.currentUser = {id: null, name: null, role: userRoles.public};
-				deferred.resolve(false);
-			});
+ 			_r.login({userId: userId, pin: pin}).$promise.then(
+				function success(res) {
+					SessionService.currentUser = {id: res.id, name: res.name, role: userRoles[res.role]};
+					StorageService.set('userid', res.id);
+					deferred.resolve(true);
+				},
+				function error(res) {
+					SessionService.currentUser = {id: null, name: null, role: userRoles.public};
+					deferred.resolve(false);
+				}
+			);
 			return p;
 		},
 		logout: function() {

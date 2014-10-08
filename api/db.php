@@ -233,10 +233,10 @@
 			$player['pin'] = $pin;
 		}
 		
-		public function UpdateUserPin(&$user)
+		public function ResetUserPin(&$user)
 		{
 			$pin = GenerateRandomPin();
-			$query = sprintf("UPDATE `players` SET `pwd_hash` = '%s' WHERE `id` = %d", MD5($pin), $user['id']);
+			$query = sprintf("UPDATE `players` SET `pwd_hash` = '%s' WHERE `id` = %d", md5($pin), $user['id']);
 			$this->mysqli->query($query);
 			
 			if (0 == $this->mysqli->affected_rows)
@@ -246,6 +246,18 @@
 			$user['pin'] = $pin;
 		}
 
+		public function ChangeUserPin($userId, $oldPin, $newPin)
+		{
+			$query = sprintf("UPDATE `players` SET `pwd_hash` = '%s' WHERE `id` = %d AND `pwd_hash` = '%s'",
+				md5($newPin), $userId, md5($oldPin));
+			$this->mysqli->query($query);
+			
+			if (0 == $this->mysqli->affected_rows)
+			{
+				throw new Exception('E_INVALID_PIN');
+			}
+		}
+		
 		public function UpdatePlayer(&$player)
 		{
 			$query = sprintf("UPDATE `players` SET `active` = %d, `role` = '%s' WHERE `id` = %d",

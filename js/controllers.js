@@ -4,7 +4,7 @@
 
 angular
 .module('kmControllers', [])
-.controller('PageCtrl', function ($scope, $state, AuthService) {
+.controller('PageCtrl', function ($scope, $state, $sce, AuthService) {
 	$scope.tabs = [
 		{ link : 'user.match', label : 'Spiel', icon: 'edit' },
 		{ link : 'user.ranking', label : 'Tabelle', icon: 'trophy' },
@@ -25,7 +25,7 @@ angular
 
 	$scope.$on('setTitle', function(event, title) {
 		event.stopPropagation();
-		$scope.title = title;
+		$scope.title = $sce.trustAsHtml(title);
 	});
 
 	$scope.loggedIn = false;
@@ -52,7 +52,6 @@ angular
 	$scope.pin = '';
 	$scope.maxDigits = 5;
 	$scope.loading = false;
-
 	$scope.colorLed = 'default';
 
 	// fetch all players
@@ -234,9 +233,76 @@ angular
 	$scope.$emit('setTitle', 'Einstellungen');
 
 })
-.controller('UserChangePwCtrl', function($scope) {
+.controller('UserChangePinCtrl', function($scope, $state, $sce, UserSettings, PopupService) {
 	$scope.$emit('setTitle', 'Passwort &auml;ndern');
 
+	$scope.states = [
+		{ msg: 'Alte PIN eingeben', pin: '' },
+		{ msg: 'Neue PIN eingeben', pin: '' },
+		{ msg: 'Neue PIN wiederholen', pin: '' }
+	];
+	angular.forEach($scope.states, function(item) {
+		item.msg = $sce.trustAsHtml(item.msg);
+	});
+	$scope.maxDigits = 5;
+	$scope.loading = false;
+	$scope.colorLed = 'default';
+
+	$scope.resetPins = function() {
+		angular.forEach($scope.states, function(item) {
+			item.pin = '';
+		});
+		$scope.stateIdx = 0;
+		$scope.current = $scope.states[$scope.stateIdx];
+	}
+	$scope.resetPins();
+	
+	$scope.$watch('current.pin', function(newVal, oldVal) {
+		// max digits entered
+		if (newVal.length == $scope.maxDigits) {
+			$scope.stateIdx++;
+			// last state?
+			if ($scope.stateIdx >= $scope.states.length) {
+				// do both new pins differ?
+				if  ($scope.states[1].pin != $scope.states[2].pin) {
+					PopupService.open(PopupService.TYPE.PT_ERROR, 'Wiederholung fehlerhaft. Nochmal!');
+					$scope.resetPins();
+				}
+				// are old and new pin equal?
+				else if  ($scope.states[0].pin == $scope.states[1].pin) {
+					PopupService.open(PopupService.TYPE.PT_ERROR, 'Alte und neue PIN sind identisch. Nochmal!');
+					$scope.resetPins();
+				}
+				else {
+					UserSettings.changePin($scope.states[0].pin, $scope.states[1].pin).then(
+						function success() {
+							PopupService.open(PopupService.TYPE.PT_SUCCESS, 'PIN ge&auml;ndert.').then(
+								function() {
+									$state.go('^.settings');
+								}
+							);
+						},
+						function error(msg) {
+							PopupService.open(PopupService.TYPE.PT_ERROR, msg);
+						}
+					);
+				}
+			}
+			else {
+				$scope.current = $scope.states[$scope.stateIdx];
+			}
+		}
+	});
+
+	$scope.login = function() {
+		$scope.loading = true;
+		AuthService.login($scope.user.id, $scope.pin).then( function(isSuccess) {
+			$scope.colorLed = (isSuccess ? 'green' : 'red');
+			$timeout(function() {
+				$scope.advance(isSuccess);
+			}, 1500);
+		});
+	}
 })
 .controller('StatisticsCtrl', function($scope, $http, Settings, Player, Statistic, $filter) {
 	$scope.$emit('setTitle', 'Statistik');
