@@ -49,7 +49,7 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 					deferred.resolve();
 				},
 				function error(res) {
-					deferred.reject();
+					deferred.reject(res.data.error.text);
 				}
 			);
 			return p;
@@ -205,6 +205,24 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 				size: 'sm',
 			};
 			return $modal.open(modalOptions).result;
+		}
+	}
+})
+.factory('ErrorLookupSvc', function() {
+	var _errorMap = [
+		{ c: 'E_INVALID_OLD_PIN',    t: 'Alte PIN ung&uuml;ltig.'},
+		{ c: 'E_USER_NAME_TAKEN',    t: 'Name bereits vergeben.'},
+		{ c: 'E_INVALID_USER_ID',    t: 'User ID ung&uuml;ltig..'}
+	];
+	return {
+		toText: function(errorCode) {
+			var text = errorCode;
+			angular.forEach(_errorMap, function(item) {
+				if (errorCode == item.c) {
+					text = item.t;
+				}
+			});
+			return text;
 		}
 	}
 });

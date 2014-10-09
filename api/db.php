@@ -241,7 +241,7 @@
 			
 			if (0 == $this->mysqli->affected_rows)
 			{
-				throw new Exception('E_INVALID_ID');
+				throw new Exception('E_INVALID_USER_ID');
 			}
 			$user['pin'] = $pin;
 		}
@@ -254,7 +254,7 @@
 			
 			if (0 == $this->mysqli->affected_rows)
 			{
-				throw new Exception('E_INVALID_PIN');
+				throw new Exception('E_INVALID_OLD_PIN');
 			}
 		}
 		
@@ -267,7 +267,7 @@
 			$this->mysqli->query($query);
 			if (0 == $this->mysqli->affected_rows)
 			{
-				throw new Exception('E_INVALID_ID');
+				throw new Exception('E_INVALID_USER_ID');
 			}
 			return $player;
 		}

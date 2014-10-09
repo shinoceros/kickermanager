@@ -233,7 +233,7 @@ angular
 	$scope.$emit('setTitle', 'Einstellungen');
 
 })
-.controller('UserChangePinCtrl', function($scope, $state, $sce, UserSettings, PopupService) {
+.controller('UserChangePinCtrl', function($scope, $state, $sce, UserSettings, PopupService, ErrorLookupSvc) {
 	$scope.$emit('setTitle', 'Passwort &auml;ndern');
 
 	$scope.states = [
@@ -282,8 +282,9 @@ angular
 								}
 							);
 						},
-						function error(msg) {
-							PopupService.open(PopupService.TYPE.PT_ERROR, msg);
+						function error(errorCode) {
+							PopupService.open(PopupService.TYPE.PT_ERROR, ErrorLookupSvc.toText(errorCode));
+							$scope.resetPins();
 						}
 					);
 				}
@@ -403,7 +404,7 @@ angular
 		);
 	}
 })
-.controller('AdminPlayerSetupCtrl', function($scope, $sce, Admin, Player, PopupService) {
+.controller('AdminPlayerSetupCtrl', function($scope, $sce, Admin, Player, PopupService, ErrorLookupSvc) {
 	$scope.$emit('setTitle', 'Spieler verwalten');
 	$scope.selectedPlayer = null;
 	$scope.updating = false;
@@ -417,9 +418,7 @@ angular
 				$scope.loadPlayers();
 			},
 			function (response) {
-				if (response.data.error) {
-					PopupService.open(PopupService.TYPE.PT_ERROR, response.data.error.text);
-				}
+				PopupService.open(PopupService.TYPE.PT_ERROR, ErrorLookupSvc.toText(response.data.error.text));
 			}
 		);
 	}
