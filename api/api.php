@@ -22,6 +22,12 @@
  		if ($am->requiresAuthentication($route, $method) && !$am->IsAuthenticated()) {
 			$app->halt(401);
 		}
+
+		// check if route requires admin role
+ 		if ($am->requiresAdminRole($route) && !$am->isAdmin()) {
+			$app->halt(401);
+		}
+
 	});
 	
 	function HandleError($e)

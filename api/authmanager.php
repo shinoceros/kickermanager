@@ -14,7 +14,6 @@
 
 		public function requiresAuthentication($route, $method)
 		{
-			// TODO: make this fancier
 			$required = true;
 			$publicRoutes = array(
 				'/auth/login' => 'POST',
@@ -31,6 +30,12 @@
 			return $required;
 		}
 
+		public function requiresAdminRole($route)
+		{
+			$reg = "/^\\/admin(\\/.*?)?$/";
+			return preg_match($reg, $route);
+		}
+		
 		public function getUserData() {
 			return $this->userData;
 		}
@@ -40,6 +45,11 @@
 			return ($this->userData['id'] !== null);
 		}
 
+		public function isAdmin() {
+			$this->getSessionData();
+			return (($this->userData['id'] !== null) && ($this->userData['role'] == 'admin'));
+		}
+		
 		public function login($userId, $pin) {
 			$db = DB::GetInstance();
 			$userinfo = $db->checkCredentials($userId, $pin);
