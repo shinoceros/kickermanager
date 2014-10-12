@@ -78,21 +78,19 @@ angular
 
 	$scope.login = function() {
 		$scope.loading = true;
-		AuthService.login($scope.user.id, $scope.pin).then( function(isSuccess) {
-			$scope.colorLed = (isSuccess ? 'green' : 'red');
-			$timeout(function() {
-				$scope.advance(isSuccess);
-			}, 1500);
-		});
-	}
-
-	$scope.advance = function(isSuccess) {
-		$scope.pin = '';
-		$scope.loading = false;
-		$scope.colorLed = 'default';
-		if (isSuccess) {
-			$state.go($stateParams.redirect || 'user.match');
-		}
+		AuthService.login($scope.user.id, $scope.pin).then(
+			function resolved(res) {
+				$scope.colorLed = (res.authed ? 'green' : 'red');
+				$timeout(function() {
+					$scope.pin = '';
+					$scope.loading = false;
+					$scope.colorLed = 'default';
+					if (res.authed) {
+						$state.go($stateParams.redirect || 'user.match');
+					}
+				}, (res.authed ? 1 : res.delay) * 1000);
+			}
+		);
 	}
 })
 .controller('RankingCtrl', function($scope, Ranking, SessionService) {

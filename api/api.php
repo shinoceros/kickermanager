@@ -30,14 +30,42 @@
 
 	});
 	
-	function HandleError($e)
-	{
+	function HandleError($e) {
 		global $app;
 		$msg = '{"error":{"text": "'. $e->getMessage() .'"}}';
 		$app->halt(400, $msg);
 		exit;
 	}
 
+	// login attempt handling
+	function CheckLoginAttempts() {
+		global $_SESSION;
+		if (!array_key_exists('attempts', $_SESSION)) {
+			$_SESSION['attempts'] = 0;
+		}
+		else {
+			// backend securing
+			if (time() < $_SESSION['lasttime'] + $_SESSION['attempts']) {
+				global $app;
+				$msg = '{"error":{"text": "login delay"}}';
+				$app->halt(400, $msg);
+			}
+		}
+	}
+
+	function IncreaseLoginAttempts() {
+		global $_SESSION;
+		++$_SESSION['attempts'];
+		$_SESSION['lasttime'] = time();
+		return $_SESSION['attempts'];
+	}
+
+	function ResetLoginAttempts() {
+		global $_SESSION;
+		unset ($_SESSION['attempts']);
+		unset ($_SESSION['lasttime']);
+	}
+	
 	// GET routes
 	$app->get('/history/:type(/:param1(/:param2))', function ($type, $param1 = '', $param2 = '') {
 		try {
@@ -187,13 +215,18 @@
 
 		switch($action) {
 			case 'login':
+				CheckLoginAttempts();
 				$cred = json_decode($request->getBody(), true);
 				if ($am->login($cred['userId'], $cred['pin'])) {
 					$user = $am->getUserData();
+					ResetLoginAttempts();
 					echo json_encode_utf8($user);
 				}
 				else {
-					$app->halt(401);
+					$attempts = IncreaseLoginAttempts();
+					$res = array('delay' => $attempts);
+					$msg = json_encode_utf8($res);
+					$app->halt(401, $msg);
 				}
 				break;
 			case 'logout':

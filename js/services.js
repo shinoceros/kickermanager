@@ -83,11 +83,11 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 				function success(res) {
 					SessionService.currentUser = {id: res.id, name: res.name, role: userRoles[res.role]};
 					StorageService.set('userid', res.id);
-					deferred.resolve(true);
+					deferred.resolve({authed: true});
 				},
 				function error(res) {
 					SessionService.currentUser = {id: null, name: null, role: userRoles.public};
-					deferred.resolve(false);
+					deferred.resolve({authed: false, delay: res.data.delay});
 				}
 			);
 			return p;
