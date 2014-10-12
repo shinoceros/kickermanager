@@ -248,13 +248,27 @@
 
 		public function ChangeUserPin($userId, $oldPin, $newPin)
 		{
+			// check if old pin valid
+			$query = sprintf("SELECT * FROM `players` WHERE `id` = %d AND `pwd_hash` = '%s'",
+				$userId, md5($oldPin));
+			$res = $this->mysqli->query($query);
+			if (0 == $res->num_rows)
+			{
+				throw new Exception('E_INVALID_OLD_PIN');
+			}
+
+			if (IsPinTrivial($newPin))
+			{
+				throw new Exception('E_TRIVIAL_NEW_PIN');
+			}
+		
 			$query = sprintf("UPDATE `players` SET `pwd_hash` = '%s' WHERE `id` = %d AND `pwd_hash` = '%s'",
 				md5($newPin), $userId, md5($oldPin));
 			$this->mysqli->query($query);
 			
 			if (0 == $this->mysqli->affected_rows)
 			{
-				throw new Exception('E_INVALID_OLD_PIN');
+				throw new Exception('E_INTERNAL');
 			}
 		}
 		

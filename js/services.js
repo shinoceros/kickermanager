@@ -212,7 +212,8 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 	var _errorMap = [
 		{ c: 'E_INVALID_OLD_PIN',    t: 'Alte PIN ung&uuml;ltig.'},
 		{ c: 'E_USER_NAME_TAKEN',    t: 'Name bereits vergeben.'},
-		{ c: 'E_INVALID_USER_ID',    t: 'User ID ung&uuml;ltig..'}
+		{ c: 'E_INVALID_USER_ID',    t: 'User ID ung&uuml;ltig.'},
+		{ c: 'E_TRIVIAL_NEW_PIN',    t: 'Neue PIN zu trivial. Nochmal!'}
 	];
 	return {
 		toText: function(errorCode) {

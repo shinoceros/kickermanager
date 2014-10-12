@@ -87,4 +87,20 @@
     	return implode($sarrayChars);
 	}
 
+	function IsPinTrivial($pin) {
+		$isTrivial = false;
+		$seq = '01234567890123';
+		// check repetitions
+		if (count(array_unique(str_split($pin))) == 1) {
+			$isTrivial = true;
+		}
+		// check sequence
+		else if (strpos($seq, $pin) !== FALSE) {
+			$isTrivial = true;
+		}
+		else if (strpos(strrev($seq), $pin) !== FALSE) {
+			$isTrivial = true;
+		}
+		return $isTrivial;
+	}
 ?>
