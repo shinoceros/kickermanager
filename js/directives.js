@@ -10,7 +10,7 @@ angular.module('kmDirectives', [])
 		},
 		replace: true,
 		templateUrl: 'partials/keypad.html',
-		controller: function($scope, $sce) {
+		controller: function($scope, $document, $sce) {
 			$scope.keys = [
 				{code: '1', label: '1'},
 				{code: '2', label: '2'},
@@ -43,8 +43,17 @@ angular.module('kmDirectives', [])
 					}
 				}
 			}
+			$document.on('keypress', function(event) {
+				$scope.$apply(function() {
+					var charCode = event.charCode;
+					if (charCode >= 48 && charCode <= 57) {
+						charCode -= 48;
+						$scope.onKeyPress(charCode.toString());
+					}
+				});
+			});
 		},
-		link: function(scope, iElement, iAttrs, ctrl) {	
+		link: function(scope, iElement, iAttrs, ctrl) {
 		}
 	}
 })
