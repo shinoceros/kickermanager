@@ -128,6 +128,7 @@ angular
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
+	$scope.submitting = false;
 	$scope.listModes = [
 		{ id: 0, label: 'Ergebnisse', type: 'results', data: null },
 		{ id: 1, label: 'Tag',        type: 'stats',   data: null },
@@ -203,11 +204,10 @@ angular
 	}
 
 	$scope.submitForm = function() {
-		$scope.submitting = true;
-
 		// all valid
 		if ($scope.validateForm(true))
 		{
+			$scope.submitting = true;
 			Match.post({
 				f1: $scope.selectedPlayer[0].id,
 				b1: $scope.selectedPlayer[1].id,
@@ -215,12 +215,11 @@ angular
 				b2: $scope.selectedPlayer[3].id,
 				goals1: $scope.goals[0],
 				goals2: $scope.goals[1]
-			}).$promise.then(function(success) {
+			}).$promise.then(function success() {
 				$scope.resetCtrl();
 				$scope.loadData();
 			});
 		}
-		$scope.submitting = false;
 	};
 
 	$scope.isCurrentUserId = function(id) {
