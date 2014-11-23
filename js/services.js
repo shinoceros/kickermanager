@@ -139,6 +139,10 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 		
 		set: function (key, value) {
 			ls[key] = value;
+		},
+		
+		delete: function(key) {
+			delete ls[key];
 		}
 	}
 })
@@ -147,7 +151,8 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 	var _type = {
 		PT_SUCCESS: 0,
 		PT_ERROR:   1,
-		PT_SELECT:  2
+		PT_SELECT:  2,
+		PT_WARNING: 3
 	};
 	
 	var _createContent = function(type, msg) {
@@ -180,6 +185,13 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 				c.buttonClass  = 'btn-warning';
 				c.closeLabel   = 'Ja';
 				c.dismissLabel = 'Nein';
+				break;
+			case _type.PT_WARNING:
+				c.dialogClass  = 'alert-warning';
+				c.iconClass    = 'fa-warning';
+				c.buttonClass  = 'btn-warning';
+				c.closeLabel   = 'OK';
+				c.dismissLabel = '';
 				break;
 		}
 		return c;

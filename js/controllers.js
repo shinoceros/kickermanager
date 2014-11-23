@@ -124,10 +124,11 @@ angular
 	}
 
 })
-.controller('MatchCtrl', function($scope, $http, $filter, $sce, Match, Settings, History, Statistic, Player, SessionService) {
+.controller('MatchCtrl', function($scope, $http, $filter, $sce, Match, Settings, History, Statistic, Player, SessionService, StorageService, PopupService) {
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
+	$scope.selectedPlayer = new Array();
 	$scope.submitting = false;
 	$scope.listModes = [
 		{ id: 0, label: 'Ergebnisse', type: 'results', data: null },
@@ -159,8 +160,36 @@ angular
 			for (var i in response) {
 				$scope.players[response[i].id] = response[i];
 			}
+			$scope.checkLastMatch();
 			$scope.loadData();
 		});
+	}
+
+	$scope.checkLastMatch = function() {
+		var data = StorageService.get('matchResult');
+		StorageService.delete('matchResult');
+		if (data) {
+			var now = new Date();
+			var storedDate = new Date();
+			storedDate.setTime(Date.parse(data.date));
+			var diff = (now - storedDate) / 1000;
+			// ask user to store unsaved result if try was < 3 minutes ago
+			if (diff <= 3 * 60) {
+				// set stored values to view
+				var storedPlayerIds = [data.f1, data.b1, data.f2, data.b2];
+				for (var i = 0; i < 4; ++i) {
+					$scope.selectedPlayer[i] = $scope.players[storedPlayerIds[i]]
+				}
+				$scope.goals[0] = data.goals1;
+				$scope.goals[1] = data.goals2;
+				var msg = "Das letzte Spiel wurde noch nicht eingetragen!";
+				PopupService.open(PopupService.TYPE.PT_WARNING, msg);
+			}
+			else {
+				// timed out
+				StorageService.delete('matchResult');
+			}
+		}
 	}
 
 	$scope.loadPlayers();
@@ -208,14 +237,18 @@ angular
 		if ($scope.validateForm(true))
 		{
 			$scope.submitting = true;
-			Match.post({
+			var data = {
 				f1: $scope.selectedPlayer[0].id,
 				b1: $scope.selectedPlayer[1].id,
 				f2: $scope.selectedPlayer[2].id,
 				b2: $scope.selectedPlayer[3].id,
 				goals1: $scope.goals[0],
-				goals2: $scope.goals[1]
-			}).$promise.then(function success() {
+				goals2: $scope.goals[1],
+				date: new Date()
+			};
+			StorageService.set('matchResult', data);
+			Match.post(data).$promise.then(function success() {
+				StorageService.delete('matchResult');
 				$scope.resetCtrl();
 				$scope.loadData();
 			});
