@@ -102,16 +102,18 @@
 			<tr>
 				<th>#</th>
 				<th>Spieler</th>
-				<th style="min-width:10%" class="text-right">ELO</th>
-				<th style="min-width:10%">&nbsp;</th>
-				<th style="min-width:20%">Quote</th>
+				<th style="min-width:20%" class="text-right">ELO</th>
+				<th>&nbsp;</th>
+				<th style="min-width:10%" class="text-center">Quote</th>
+				<th style="min-width:10%" class="text-center">Spiele</th>
 			</tr>
 			<tr ng-repeat="d in currentListMode.item.data | orderBy: '-deltaelo'" ng-class="{highlight: isCurrentUserId(players[d.id].id)}">
 				<td>{{$index + 1}}</td>
 				<td>{{players[d.id].name}}</td>
 				<td class='text-right'>{{d.deltaelo | float: 1}}</td>
 				<td><i class="fa" ng-class="{'lost fa-caret-down': d.deltaelo < 0, 'won fa-caret-up': d.deltaelo > 0}"></i></td>
-				<td>{{d.wins / d.total | percent: 1}}</td>
+				<td class="text-center">{{d.wins / d.total | percent: 1}}</td>
+				<td class="text-center">{{d.total}}</td>
 			</tr>
 		</table>
 	</div>

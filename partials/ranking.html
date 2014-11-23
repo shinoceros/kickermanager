@@ -17,8 +17,9 @@
 		<th>#</th>
 		<th>Name</th>
 		<th>ELO</th>
-		<th>Quote</th>
-		<th>Tore</th>
+		<th class="text-center">Quote</th>
+		<th class="text-center">Spiele</th>
+		<th class="text-center">Tore</th>
 	</tr>
 	<tr
 		ng-repeat="r in ranking | filter: hasPlayed | orderBy: '-elo'"
@@ -26,7 +27,8 @@
 		<td >{{$index + 1}}</td>
 		<td ><a href="#/player/{{r.id}}" class="media-object">{{r.name}}</a></td>
 		<td >{{r.elo | float: 1}}</td>
-		<td >{{r.winrate | percent: 1}}</td>
-		<td >{{r.goaldiff}}</td>
+		<td class="text-center">{{r.winrate | percent: 1}}</td>
+		<td class="text-center">{{r.total}}</td>
+		<td class="text-center">{{r.goaldiff}}</td>
 	</tr>
 </table>
