@@ -3,6 +3,7 @@
 var kmApp = angular.module('kmApp', [
 	'ui.bootstrap',
 	'ui.router',
+	'ngAnimate',
 	'kmControllers',
 	'kmServices',
 	'kmFilters',
@@ -14,7 +15,7 @@ var kmApp = angular.module('kmApp', [
 	$urlRouterProvider.otherwise("/match");
 
 	var access = routingConfig.accessLevels;
-	
+
 	// anonymous routes
 	$stateProvider
 		.state('anon', {
@@ -34,7 +35,7 @@ var kmApp = angular.module('kmApp', [
 			},
 			controller: 'LoginCtrl'
 		});
-		
+
 	// user routes
 	$stateProvider
 		.state('user', {
@@ -105,7 +106,7 @@ var kmApp = angular.module('kmApp', [
 			templateUrl: 'partials/admin.matchedit.html',
 			controller: 'AdminMatchEditCtrl'
 		});
-		
+
 	$httpProvider.interceptors.push(function($q, $injector) {
 		return {
 			'responseError': function(response) {

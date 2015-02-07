@@ -124,16 +124,20 @@ angular
 	}
 
 })
-.controller('MatchCtrl', function($scope, $http, $filter, $sce, Match, Settings, History, Statistic, Player, SessionService, StorageService, PopupService) {
+.controller('MatchCtrl', function($scope, $http, $filter, $sce, $q, Match, Settings, History, Statistic, Player, SessionService, StorageService, PopupService) {
 	$scope.$emit('setTitle', 'Spiel eintragen');
 	$scope.goals = ['*', '*'];
 	$scope.players = new Array();
+	$scope.settings = new Array();
 	$scope.selectedPlayer = new Array();
 	$scope.submitting = false;
+	$scope.loadingData = false;
+
+	// tab handling
 	$scope.listModes = [
-		{ id: 0, label: 'Ergebnisse', type: 'results', data: null },
-		{ id: 1, label: 'Tag',        type: 'stats',   data: null },
-		{ id: 2, label: 'Woche',      type: 'stats',   data: null }
+		{ id: 0, label: 'Ergebnisse', type: 'results', data: null, loading: false },
+		{ id: 1, label: 'Tag',        type: 'stats',   data: null, loading: false },
+		{ id: 2, label: 'Woche',      type: 'stats',   data: null, loading: false }
 	];
 
 	angular.forEach($scope.listModes, function(listMode) {
@@ -143,10 +147,23 @@ angular
 	$scope.currentListMode = { item: $scope.listModes[0] };
 
 	$scope.loadData = function() {
+		$scope.loadingData = true;
 		var d = $filter('date')(new Date(), 'yyyy-MM-dd');
-		$scope.listModes[0].data = History.query({type: 'date', param1: d})
-		$scope.listModes[1].data = Statistic.query({type: 'day', param: d})
-		$scope.listModes[2].data = Statistic.query({type: 'week', param: d});
+		var promises = [
+			History.query({type: 'date', param1: d}).$promise,
+			Statistic.query({type: 'day', param: d}).$promise,
+			Statistic.query({type: 'week', param: d}).$promise
+		];
+		angular.forEach(promises, function(value, key) {
+			$scope.listModes[key].loading = true;
+			value.then(function(response) {
+				$scope.listModes[key].data = response;
+				$scope.listModes[key].loading = false;
+			});
+		});
+		$q.all(promises).then(function() {
+			$scope.loadingData = false;
+		});
 	}
 
 	Settings.get().$promise.then(function(response) {
@@ -286,7 +303,7 @@ angular
 		$scope.current = $scope.states[$scope.stateIdx];
 	}
 	$scope.resetPins();
-	
+
 	$scope.$watch('current.pin', function(newVal, oldVal) {
 		// max digits entered
 		if (newVal.length == $scope.maxDigits) {
@@ -414,7 +431,7 @@ angular
 .controller('AdminGameSetupCtrl', function($scope, Settings, Admin, PopupService) {
 	$scope.$emit('setTitle', 'Spieloptionen');
 	$scope.settings = Settings.get();
-	
+
 	$scope.startNewSeason = function() {
 		PopupService.open(PopupService.TYPE.PT_SELECT, 'Neue Saison jetzt starten?').then(
 			function() {

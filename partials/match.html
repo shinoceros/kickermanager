@@ -65,15 +65,15 @@
 		<div class="form-group text-center">
 			<div class="btn-group">
 				<label class="btn btn-primary" ng-repeat="l in listModes" ng-change="onChangeListMode()" ng-model="currentListMode.item" ng-bind-html="l.label" btn-radio="l"></label>
-				<label class="btn btn-primary" ng-click="loadData()"><i class="fa fa-refresh"></i></label>
+				<label class="btn btn-primary" ng-click="loadData()" ng-disabled="loadingData"><i class="fa fa-refresh" ng-class="{'fa-spin': loadingData}"></i></label>
 			</div>
 		</div>
 	</div>
 
-	<km-loading ng-if="!currentListMode.item.data.$resolved"></km-loading>
+	<!--km-loading ng-if="!currentListMode.item.data.$resolved"></km-loading-->
 	
 	<!-- match results table -->
-	<div class="row" ng-if="currentListMode.item.type == 'results' && currentListMode.item.data.$resolved">
+	<div class="row" ng-if="currentListMode.item.type == 'results'" ng-class="{'data-loading': currentListMode.item.loading}">
 		<table class="table table-striped table-condensed">
 			<tr>
 				<th>Datum</th>
@@ -97,7 +97,7 @@
 	</div>
 
 	<!-- statistics table -->
-	<div class="row" ng-if="currentListMode.item.type == 'stats' && currentListMode.item.data.$resolved">
+	<div class="row" ng-if="currentListMode.item.type == 'stats'" ng-class="{'data-loading': currentListMode.item.loading}">
 		<table class="table table-striped table-condensed">
 			<tr>
 				<th>#</th>

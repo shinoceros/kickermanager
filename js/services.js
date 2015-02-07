@@ -1,6 +1,8 @@
 var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 .factory('Settings', function($resource) {
-	return $resource('api/settings');
+	return $resource('api/settings', {}, {
+		get:	{method:'GET', cache: true}
+    });
 })
 .factory('Ranking', function($resource) {
 	return $resource('api/ranking/:mode', {}, {
@@ -9,7 +11,7 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 })
 .factory('Player', function($resource) {
 	return $resource('api/player/:playerId', {}, {
-		query:	{method:'GET', params: {playerId: ''}, isArray: true},
+		query:	{method:'GET', params: {playerId: ''}, isArray: true, cache: true},
 		post:	{method:'POST'},
 		update:	{method:'PUT', params: {playerId: '@playerId'}}
 	});
@@ -43,7 +45,7 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 		changePin: function(oldPin, newPin) {
 			var deferred = $q.defer();
 			var p = deferred.promise;
-			
+
  			_r.changePin({oldpin: oldPin, newpin: newPin}).$promise.then(
 				function success(res) {
 					deferred.resolve();
@@ -66,7 +68,7 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 		logout:	   {method:'POST', params: {action: 'logout'}},
 		check:     {method:'GET',  params: {action: 'check'}}
 	});
-	
+
 	return {
 		authorize: function(accessLevel) {
 			role = SessionService.currentUser.role;
@@ -78,7 +80,7 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 		login: function(userId, pin) {
 			var deferred = $q.defer();
 			var p = deferred.promise;
-			
+
  			_r.login({userId: userId, pin: pin}).$promise.then(
 				function success(res) {
 					SessionService.currentUser = {id: res.id, name: res.name, role: userRoles[res.role]};
@@ -136,11 +138,11 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 		get: function (key) {
 			return ls[key];
 		},
-		
+
 		set: function (key, value) {
 			ls[key] = value;
 		},
-		
+
 		delete: function(key) {
 			delete ls[key];
 		}
@@ -154,7 +156,7 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 		PT_SELECT:  2,
 		PT_WARNING: 3
 	};
-	
+
 	var _createContent = function(type, msg) {
 		var c = {
 			dialogClass: '',
@@ -196,7 +198,7 @@ var kmServices = angular.module('kmServices', ['ngResource', 'ngStorage'])
 		}
 		return c;
 	}
-	
+
 	return {
 		TYPE: _type,
 		open: function(type, msg) {
