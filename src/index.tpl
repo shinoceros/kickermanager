@@ -9,9 +9,9 @@
 		<script src="js/angular/1.3.13/angular-animate.js"></script>
 		<script src="js/angular-ui-router/angular-ui-router-0.2.13.js"></script>
 		<script src="js/ui-bootstrap/ui-bootstrap-tpls-0.12.1.js"></script>
-		<script src="js/highcharts/standalone-framework.src.js"></script>
+		<script src="js/highcharts/standalone-framework-4.1.1.js"></script>
 		<script src="js/highcharts/highcharts-4.1.1.js"></script>
-		<script src="js/highcharts/highcharts-ng.js"></script>
+		<script src="js/highcharts/highcharts-ng-0.0.7.js"></script>
 		<script src="js/kickermanager/app.js"></script>
 		<script src="js/kickermanager/controllers.js"></script>
 		<script src="js/kickermanager/services.js"></script>

@@ -1,5 +1,5 @@
 /**
- * @license @product.name@ JS v@product.version@ (@product.date@)
+ * @license Highcharts JS v4.1.1 (2015-02-17)
  *
  * Standalone Highcharts Framework
  *
