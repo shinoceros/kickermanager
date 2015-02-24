@@ -2,7 +2,10 @@
 
 ## Introduction
 <img align="right" src="https://github.com/shinoceros/kickermanager/blob/master/doc/screenshot1.png"/>
-Kickermanager is a small web application for table soccer (a.k.a. foosball) enthusiasts who want to keep track of their results. Features include score submitting, an ELO based system, ranking tables, seasons as well as player and match statistics.
+Kickermanager is a small web application for table soccer (a.k.a. foosball) enthusiasts who want to keep track of their results. Features include user management, a basic role system, score submitting, an ELO based ranking system, ranking tables, multiple seasons as well as player and match statistics.
+
+Currently the UI is only in German, English localization might be added in future releases.
+<br clear="all">
 
 ## Authors
 * Andre Meyer
