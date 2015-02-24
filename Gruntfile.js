@@ -68,10 +68,10 @@ module.exports = function(grunt) {
 					separator: ';'
 				},
 				src: [
-					'<%= DIRS.SRC %>/js/angular/1.2.23/angular.js',
-					'<%= DIRS.SRC %>/js/angular/1.2.23/angular-ui-router.js',
-					'<%= DIRS.SRC %>/js/angular/1.2.23/angular-resource.js',
-					'<%= DIRS.SRC %>/js/angular/1.2.23/angular-animate.js',
+					'<%= DIRS.SRC %>/js/angular/1.3.13/angular.js',
+					'<%= DIRS.SRC %>/js/angular/1.3.13/angular-resource.js',
+					'<%= DIRS.SRC %>/js/angular/1.3.13/angular-animate.js',
+					'<%= DIRS.SRC %>/js/angular-ui-router/angular-ui-router-0.2.13.js',
 					'<%= DIRS.SRC %>/js/ui-bootstrap/ui-bootstrap-tpls-0.12.1.js',
 					'<%= DIRS.SRC %>/js/highcharts/standalone-framework.src.js',
 					'<%= DIRS.SRC %>/js/highcharts/highcharts-4.1.1.js',
@@ -82,7 +82,7 @@ module.exports = function(grunt) {
 					'<%= DIRS.SRC %>/js/kickermanager/filters.js',
 					'<%= DIRS.SRC %>/js/kickermanager/directives.js',
 					'<%= DIRS.SRC %>/js/kickermanager/routingConfig.js',
-					'<%= DIRS.SRC %>/js/other/loading-bar.js',
+					'<%= DIRS.SRC %>/js/other/loading-bar-0.7.0.js',
 					'<%= DIRS.SRC %>/js/other/fastclick.js',
 					'<%= DIRS.SRC %>/js/other/ngStorage.js'
 				],
@@ -96,7 +96,7 @@ module.exports = function(grunt) {
 					'<%= DIRS.SRC %>/css/bootstrap.min.css',
 					'<%= DIRS.SRC %>/css/font-awesome.min.css',
 					'<%= DIRS.SRC %>/css/kickermanager.css',
-					'<%= DIRS.SRC %>/css/loading-bar.css'
+					'<%= DIRS.SRC %>/css/loading-bar-0.7.0.css'
 				],
 				dest: '<%= DIRS.TEMP %>/css/<%= TARGET.CSS.CONCAT %>'
 			}

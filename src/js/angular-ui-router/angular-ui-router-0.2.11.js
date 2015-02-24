@@ -2150,7 +2150,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
    *
    * <a id='controllerAs'></a>
    * 
-   * - **`controllerAs`** â€“ {string=} â€“ A controller alias name. If present the controller will be 
+   * - **`controllerAs`** – {string=} – A controller alias name. If present the controller will be 
    *   published to scope under the controllerAs name.
    *
    * <a id='resolve'></a>

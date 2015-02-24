@@ -47,8 +47,7 @@ body { padding-top: 50px; }
 }
 
 .keypad button {
-	margin-bottom: 8px;
-	margin-right: 8px;
+	margin: 4px;
 	width: 60px;
 	height: 60px;
 	font-size: 23px;
