@@ -5,14 +5,14 @@ All notable changes to the kickermanager application will be documented in this 
 ### Changed
 - ...
 
-## [1.0.2](5912475680cf57bde5cf349d5888f64e40d032b5) - 2015-02-24
+## 1.0.2 - 2015-02-24
 ### Changed
 - Upgrade to HighCharts 4.1.1
 
-## [1.0.1] - 2015-02-24
+## 1.0.1 - 2015-02-24
 ### Changed
 - Upgrade to AngularJS 1.3.13
 
-## [1.0.0] - 2015-02-24
+## 1.0.0 - 2015-02-24
 ### Changed
 - Initial release generated with GruntJS
