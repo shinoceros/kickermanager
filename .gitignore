@@ -1,0 +1,4 @@
+node_modules
+.tmp
+dev
+src/api/dbconfig.php
