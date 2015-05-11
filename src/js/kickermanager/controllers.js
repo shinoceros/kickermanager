@@ -275,6 +275,15 @@ angular
 	$scope.isCurrentUserId = function(id) {
 		return (id == SessionService.currentUser.id);
 	}
+
+	$scope.getMatchResultClass = function(data) {
+		var userId = SessionService.currentUser.id;
+		if (userId !== data.f1 && userId !== data.b1 && userId !== data.f2 && userId !== data.b2) {
+			return '';
+		}
+		var isLeft = (userId === data.f1 || userId === data.b1);
+		return (isLeft != (data.deltaelo > 0) ? 'match_lost' : 'match_won');
+	}
 })
 .controller('UserSettingsCtrl', function($scope) {
 	$scope.$emit('setTitle', 'Einstellungen');

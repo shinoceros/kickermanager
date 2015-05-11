@@ -4,10 +4,10 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 		<!-- @if production=false -->
-		<script src="js/angular/1.3.13/angular.js"></script>
-		<script src="js/angular/1.3.13/angular-resource.js"></script>
-		<script src="js/angular/1.3.13/angular-animate.js"></script>
-		<script src="js/angular-ui-router/angular-ui-router-0.2.13.js"></script>
+		<script src="js/angular/1.3.15/angular.js"></script>
+		<script src="js/angular/1.3.15/angular-resource.js"></script>
+		<script src="js/angular/1.3.15/angular-animate.js"></script>
+		<script src="js/angular-ui-router/angular-ui-router-0.2.14.js"></script>
 		<script src="js/ui-bootstrap/ui-bootstrap-tpls-0.12.1.js"></script>
 		<script src="js/highcharts/standalone-framework-4.1.1.js"></script>
 		<script src="js/highcharts/highcharts-4.1.1.js"></script>
@@ -56,7 +56,7 @@
 						</li>
 					</ul>
 					<ul class="nav navbar-nav navbar-right">
-						<li><a ui-sref="user.logout" ng-if="loggedIn" ng-click="collapse(); logout()">
+						<li><a ui-sref="anon.login" ng-if="loggedIn" ng-click="collapse(); logout()">
 							<i class="fa fa-power-off"></i> Logout</a>
 						</li>
 					</ul>

@@ -68,10 +68,10 @@ module.exports = function(grunt) {
 					separator: ';'
 				},
 				src: [
-					'<%= DIRS.SRC %>/js/angular/1.3.13/angular.js',
-					'<%= DIRS.SRC %>/js/angular/1.3.13/angular-resource.js',
-					'<%= DIRS.SRC %>/js/angular/1.3.13/angular-animate.js',
-					'<%= DIRS.SRC %>/js/angular-ui-router/angular-ui-router-0.2.13.js',
+					'<%= DIRS.SRC %>/js/angular/1.3.15/angular.js',
+					'<%= DIRS.SRC %>/js/angular/1.3.15/angular-resource.js',
+					'<%= DIRS.SRC %>/js/angular/1.3.15/angular-animate.js',
+					'<%= DIRS.SRC %>/js/angular-ui-router/angular-ui-router-0.2.14.js',
 					'<%= DIRS.SRC %>/js/ui-bootstrap/ui-bootstrap-tpls-0.12.1.js',
 					'<%= DIRS.SRC %>/js/highcharts/standalone-framework-4.1.1.js',
 					'<%= DIRS.SRC %>/js/highcharts/highcharts-4.1.1.js',

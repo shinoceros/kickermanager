@@ -41,6 +41,14 @@ body { padding-top: 50px; }
     background-color: Khaki;
 }
 
+.table-striped tbody tr.match_won td {
+    background-color: #C0F0A0;
+}
+
+.table-striped tbody tr.match_lost td {
+    background-color: #F0C0C0;
+}
+
 .keypad {
 	width: 220px;
 	margin: auto;

@@ -81,7 +81,7 @@
 				<th class="text-center">Ergebnis</th>
 				<th>Team2</th>
 			</tr>
-			<tr ng-repeat="d in currentListMode.item.data | orderBy: '-timestamp'">
+			<tr ng-repeat="d in currentListMode.item.data | orderBy: '-timestamp'" ng-class="getMatchResultClass(d)">
 				<td>{{d.timestamp}}</td>
 				<td>{{players[d.f1].name}}<br>{{players[d.b1].name}}</td>
 				<td class="text-center"><strong>{{d.goals1}} : {{d.goals2}}</strong>
@@ -102,10 +102,11 @@
 			<tr>
 				<th>#</th>
 				<th>Spieler</th>
-				<th style="min-width:20%" class="text-right">ELO</th>
+				<th class="text-right">ELO</th>
 				<th>&nbsp;</th>
-				<th style="min-width:10%" class="text-center">Quote</th>
-				<th style="min-width:10%" class="text-center">Spiele</th>
+				<th class="text-center">Quote</th>
+				<th class="text-center">Spiele</th>
+				<th class="text-center">Tore</th>
 			</tr>
 			<tr ng-repeat="d in currentListMode.item.data | orderBy: '-deltaelo'" ng-class="{highlight: isCurrentUserId(players[d.id].id)}">
 				<td>{{$index + 1}}</td>
@@ -114,6 +115,7 @@
 				<td><i class="fa" ng-class="{'lost fa-caret-down': d.deltaelo < 0, 'won fa-caret-up': d.deltaelo > 0}"></i></td>
 				<td class="text-center">{{d.wins / d.total | percent: 1}}</td>
 				<td class="text-center">{{d.total}}</td>
+				<td class="text-center">{{d.goaldiff}}</td>
 			</tr>
 		</table>
 	</div>

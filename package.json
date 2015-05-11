@@ -1,6 +1,6 @@
 {
   "name": "kickermanager",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Table league kicker manager",
   "author": "Andreas Koch",
   "devDependencies": {

@@ -12,7 +12,11 @@ var kmApp = angular.module('kmApp', [
 	'highcharts-ng'
 ])
 .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
-	$urlRouterProvider.otherwise("/match");
+
+	$urlRouterProvider.otherwise(function ($injector) {
+		var $state = $injector.get('$state');
+		$state.go('user.match');
+	});
 
 	var access = routingConfig.accessLevels;
 
