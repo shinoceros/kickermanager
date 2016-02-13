@@ -180,7 +180,7 @@
 				UNION
 				SELECT b2 AS id, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, timestamp FROM matches
 				) AS m ON p.id = m.id
-				WHERE DATE(timestamp) >= '%s' AND DATE(timestamp) <= '%s'
+				WHERE DATE(timestamp) >= STR_TO_DATE('%s', '%Y-%m-%d') AND DATE(timestamp) <= STR_TO_DATE('%s', '%Y-%m-%d')
 				GROUP BY (p.id)",
 			$from, $to);
 
