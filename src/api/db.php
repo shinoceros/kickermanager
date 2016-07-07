@@ -111,7 +111,7 @@
 						SUM(owngoals) - SUM(oppgoals) AS goaldiff,
 						SUM(IF(owngoals > oppgoals, 1, 0))/ COUNT(*) AS winrate
 						FROM players p
-						LEFT JOIN (".implode(" UNION ", $subselects).")
+						LEFT JOIN (".implode(" UNION ALL ", $subselects).")
 						AS m ON p.id = m.pos
  						WHERE m.season = $season
 						GROUP BY p.id";
@@ -138,11 +138,11 @@
 						FROM players p
 						LEFT JOIN (
 							SELECT f1 AS pos, deltaelo, timestamp, season FROM matches
-							UNION
+							UNION ALL
 							SELECT b1 AS pos, deltaelo, timestamp, season FROM matches
-							UNION
+							UNION ALL
 							SELECT f2 AS pos, (-1 * deltaelo) AS deltaelo, timestamp, season FROM matches
-							UNION
+							UNION ALL
 							SELECT b2 AS pos, (-1 * deltaelo) AS deltaelo, timestamp, season FROM matches
 						) AS m ON p.id = m.pos
  						WHERE p.id = $pid AND season = $season
@@ -173,11 +173,11 @@
 				FROM players p
 				LEFT JOIN (
 				SELECT f1 AS id, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, timestamp FROM matches
-				UNION
+				UNION ALL
 				SELECT b1 AS id, goals1 AS owngoals, goals2 AS oppgoals, deltaelo, timestamp FROM matches
-				UNION
+				UNION ALL
 				SELECT f2 AS id, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, timestamp FROM matches
-				UNION
+				UNION ALL
 				SELECT b2 AS id, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, timestamp FROM matches
 				) AS m ON p.id = m.id
 				WHERE DATE(timestamp) >= STR_TO_DATE('%s', '%Y-%m-%d') AND DATE(timestamp) <= STR_TO_DATE('%s', '%Y-%m-%d')
