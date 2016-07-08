@@ -35,6 +35,7 @@
 			}
 
 			$this->mysqli->select_db($database);
+			$this->mysqli->set_charset('utf8');
 		}
 
 		//************************ PUBLIC METHODS ****************************
