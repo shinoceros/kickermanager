@@ -201,7 +201,7 @@
 		public function AddMatch($match)
 		{
 			$settings = $this->GetSettings();
-			$query = sprintf("INSERT INTO `matches` (`f1`, `b1`, `f2`, `b2`, `goals1`, `goals2`,`deltaelo`, `timestamp`, `season`) VALUES (%d, %d, %d, %d, %d, %d, %f, NOW(), %d)",
+			$query = sprintf("INSERT INTO `matches` (`f1`, `b1`, `f2`, `b2`, `goals1`, `goals2`,`deltaelo`, `timestamp`, `season`) VALUES (%d, %d, %d, %d, %d, %d, %s, NOW(), %d)",
 						$match['f1'],
 						$match['b1'],
 						$match['f2'],
@@ -374,7 +374,7 @@
 					(int)$m['goals2']
 				);
 				if ($m['timestamp'] >= $fromTimestamp) {
-					$query = sprintf("UPDATE `matches` SET deltaelo = %f WHERE id = %d", $deltaelo, $m['id']);
+					$query = sprintf("UPDATE `matches` SET deltaelo = %s WHERE id = %d", $deltaelo, $m['id']);
 					$this->mysqli->query($query);
 				}
 
