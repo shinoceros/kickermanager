@@ -115,6 +115,7 @@
 						LEFT JOIN (".implode(" UNION ALL ", $subselects).")
 						AS m ON p.id = m.pos
  						WHERE m.season = $season
+ 						AND p.active = 1
 						GROUP BY p.id";
 
 			return $this->FillResultArray($query, $method);
