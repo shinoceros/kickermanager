@@ -186,13 +186,14 @@
 		try {
 			$db = DB::GetInstance();
 			$settings = $db->GetSettings();
-			$r = $db->GetRanking('total', $settings['currentSeason'], 'index');
+			$r_attack = $db->GetRanking('attacker', $settings['currentSeason'], 'index');
+			$r_defend = $db->GetRanking('defender', $settings['currentSeason'], 'index');
 			// if ids of players can not be found in ranking table they haven't played -> use base elo as input elo
 			$eloIn = array(
-				array_key_exists($match['f1'], $r) ? $r[$match['f1']]['elo'] : $settings['baseELO'],
-				array_key_exists($match['b1'], $r) ? $r[$match['b1']]['elo'] : $settings['baseELO'],
-				array_key_exists($match['f2'], $r) ? $r[$match['f2']]['elo'] : $settings['baseELO'],
-				array_key_exists($match['b2'], $r) ? $r[$match['b2']]['elo'] : $settings['baseELO']
+				array_key_exists($match['f1'], $r_attack) ? $r_attack[$match['f1']]['elo'] : $settings['baseELO'],
+				array_key_exists($match['b1'], $r_defend) ? $r_defend[$match['b1']]['elo'] : $settings['baseELO'],
+				array_key_exists($match['f2'], $r_attack) ? $r_attack[$match['f2']]['elo'] : $settings['baseELO'],
+				array_key_exists($match['b2'], $r_defend) ? $r_defend[$match['b2']]['elo'] : $settings['baseELO']
 			);
 			$match['deltaelo'] = calcDeltaELO(
 				$eloIn[0],
