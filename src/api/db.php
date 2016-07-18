@@ -35,7 +35,7 @@
 			}
 
 			$this->mysqli->select_db($database);
-			$this->mysqli->set_charset('utf8');
+			//$this->mysqli->set_charset('utf8');
 		}
 
 		//************************ PUBLIC METHODS ****************************
@@ -82,6 +82,8 @@
 			$b2_subselect = "SELECT b2 AS pos, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, season FROM matches";
 
 			$subselects = array();
+			$divider = 1.0;
+			
 
 			switch ($mode) {
 				case 'attacker':
@@ -97,6 +99,7 @@
 					$subselects[] = $f2_subselect;
 					$subselects[] = $b1_subselect;
 					$subselects[] = $b2_subselect;
+					$divider = 2.0;
 					break;
 				default:
 					break;
@@ -106,7 +109,7 @@
 			$query = "SELECT
 						p.id,
 						p.name,
-						".$settings['baseELO']." + SUM(m.deltaelo) AS elo,
+						".$settings['baseELO']." + SUM(m.deltaelo) / $divider AS elo,
 						COUNT(*) AS total,
 						CAST(SUM(IF(owngoals > oppgoals, 1, 0)) AS INT) AS wins,
 						CAST((SUM(owngoals) - SUM(oppgoals)) AS INT) AS goaldiff,
@@ -115,7 +118,7 @@
 						LEFT JOIN (".implode(" UNION ALL ", $subselects).")
 						AS m ON p.id = m.pos
  						WHERE m.season = $season
- 						AND p.active = 1
+						AND p.active = 1
 						GROUP BY p.id";
 
 			return $this->FillResultArray($query, $method);
@@ -136,7 +139,7 @@
 		{
 			$query = "SELECT
 						DATE(m.timestamp) AS date,
-						sum(m.deltaelo) AS elo
+						sum(m.deltaelo) / 2.0 AS elo
 						FROM players p
 						LEFT JOIN (
 							SELECT f1 AS pos, deltaelo, timestamp, season FROM matches
@@ -182,7 +185,7 @@
 				UNION ALL
 				SELECT b2 AS id, goals2 AS owngoals, goals1 AS oppgoals, (-1 * deltaelo) AS deltaelo, timestamp FROM matches
 				) AS m ON p.id = m.id
-				WHERE DATE(timestamp) >= STR_TO_DATE('%s', '%Y-%m-%d') AND DATE(timestamp) <= STR_TO_DATE('%s', '%Y-%m-%d')
+				WHERE DATE(timestamp) BETWEEN '%s' AND '%s'
 				GROUP BY (p.id)",
 			$from, $to);
 
@@ -362,27 +365,29 @@
 			// reset all players ELO to initial value
 			foreach ($players as &$p)
 			{
-				$p['elo'] = $settings['baseELO'];
+				$p['elo_attack'] = $settings['baseELO'];
+				$p['elo_defend'] = $settings['baseELO'];
 			}
 			// calc ELO for whole season
 			foreach ($matches as $m) {
 				$deltaelo = calcDeltaELO(
-					$players[$m['f1']]['elo'],
-					$players[$m['b1']]['elo'],
-					$players[$m['f2']]['elo'],
-					$players[$m['b2']]['elo'],
+					$players[$m['f1']]['elo_attack'],
+					$players[$m['b1']]['elo_defend'],
+					$players[$m['f2']]['elo_attack'],
+					$players[$m['b2']]['elo_defend'],
 					(int)$m['goals1'],
 					(int)$m['goals2']
 				);
+
 				if ($m['timestamp'] >= $fromTimestamp) {
 					$query = sprintf("UPDATE `matches` SET deltaelo = %s WHERE id = %d", $deltaelo, $m['id']);
 					$this->mysqli->query($query);
 				}
 
-				$players[$m['f1']]['elo'] += $deltaelo;
-				$players[$m['b1']]['elo'] += $deltaelo;
-				$players[$m['f2']]['elo'] -= $deltaelo;
-				$players[$m['b2']]['elo'] -= $deltaelo;
+				$players[$m['f1']]['elo_attack'] += $deltaelo;
+				$players[$m['b1']]['elo_defend'] += $deltaelo;
+				$players[$m['f2']]['elo_attack'] -= $deltaelo;
+				$players[$m['b2']]['elo_defend'] -= $deltaelo;
 			}
 		}
 	}
