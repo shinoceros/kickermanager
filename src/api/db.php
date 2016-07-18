@@ -108,9 +108,9 @@
 						p.name,
 						".$settings['baseELO']." + SUM(m.deltaelo) AS elo,
 						COUNT(*) AS total,
-						SUM(IF(owngoals > oppgoals, 1, 0)) AS wins,
-						SUM(owngoals) - SUM(oppgoals) AS goaldiff,
-						SUM(IF(owngoals > oppgoals, 1, 0))/ COUNT(*) AS winrate
+						CAST(SUM(IF(owngoals > oppgoals, 1, 0)) AS INT) AS wins,
+						CAST((SUM(owngoals) - SUM(oppgoals)) AS INT) AS goaldiff,
+						CAST((SUM(IF(owngoals > oppgoals, 1, 0)) / COUNT(*)) AS DOUBLE) AS winrate
 						FROM players p
 						LEFT JOIN (".implode(" UNION ALL ", $subselects).")
 						AS m ON p.id = m.pos
