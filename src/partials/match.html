@@ -75,48 +75,56 @@
 	<!-- match results table -->
 	<div class="row" ng-if="currentListMode.item.type == 'results'" ng-class="{'data-loading': currentListMode.item.loading}">
 		<table class="table table-striped table-condensed">
-			<tr>
-				<th>Datum</th>
-				<th>Team1</th>
-				<th class="text-center">Ergebnis</th>
-				<th>Team2</th>
-			</tr>
-			<tr ng-repeat="d in currentListMode.item.data | orderBy: '-timestamp'" ng-class="getMatchResultClass(d)">
-				<td>{{d.timestamp}}</td>
-				<td>{{players[d.f1].name}}<br>{{players[d.b1].name}}</td>
-				<td class="text-center"><strong>{{d.goals1}} : {{d.goals2}}</strong>
-					<p>
-						<i class="fa" ng-class="{'won fa-caret-up': d.deltaelo > 0, 'lost fa-caret-down': d.deltaelo < 0}"></i>
-						{{d.deltaelo | abs | float: 1}}
-						<i class="fa" ng-class="{'lost fa-caret-down': d.deltaelo > 0, 'won fa-caret-up': d.deltaelo < 0}"></i>
-					</p>
-				</td>
-				<td>{{players[d.f2].name}}<br>{{players[d.b2].name}}</td>
-			</tr>
+			<thead>
+				<tr>
+					<th>Datum</th>
+					<th>Team1</th>
+					<th class="text-center">Ergebnis</th>
+					<th>Team2</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="d in currentListMode.item.data | orderBy: '-timestamp'" ng-class="getMatchResultClass(d)">
+					<td>{{d.timestamp}}</td>
+					<td>{{players[d.f1].name}}<br>{{players[d.b1].name}}</td>
+					<td class="text-center"><strong>{{d.goals1}} : {{d.goals2}}</strong>
+						<p>
+							<i class="fa" ng-class="{'won fa-caret-up': d.deltaelo > 0, 'lost fa-caret-down': d.deltaelo < 0}"></i>
+							{{d.deltaelo | abs | float: 1}}
+							<i class="fa" ng-class="{'lost fa-caret-down': d.deltaelo > 0, 'won fa-caret-up': d.deltaelo < 0}"></i>
+						</p>
+					</td>
+					<td>{{players[d.f2].name}}<br>{{players[d.b2].name}}</td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
 
 	<!-- statistics table -->
 	<div class="row" ng-if="currentListMode.item.type == 'stats'" ng-class="{'data-loading': currentListMode.item.loading}">
 		<table class="table table-striped table-condensed">
-			<tr>
-				<th>#</th>
-				<th>Spieler</th>
-				<th class="text-right">ELO</th>
-				<th>&nbsp;</th>
-				<th class="text-center">Quote</th>
-				<th class="text-center">Spiele</th>
-				<th class="text-center">Tore</th>
-			</tr>
-			<tr ng-repeat="d in currentListMode.item.data | orderBy: '-deltaelo'" ng-class="{highlight: isCurrentUserId(players[d.id].id)}">
-				<td>{{$index + 1}}</td>
-				<td>{{players[d.id].name}}</td>
-				<td class='text-right'>{{d.deltaelo | float: 1}}</td>
-				<td><i class="fa" ng-class="{'lost fa-caret-down': d.deltaelo < 0, 'won fa-caret-up': d.deltaelo > 0}"></i></td>
-				<td class="text-center">{{d.wins / d.total | percent: 1}}</td>
-				<td class="text-center">{{d.total}}</td>
-				<td class="text-center">{{d.goaldiff}}</td>
-			</tr>
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Spieler</th>
+					<th class="text-right">ELO</th>
+					<th>&nbsp;</th>
+					<th class="text-center">Quote</th>
+					<th class="text-center">Spiele</th>
+					<th class="text-center">Tore</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="d in currentListMode.item.data | orderBy: '-deltaelo'" ng-class="{highlight: isCurrentUserId(players[d.id].id)}">
+					<td>{{$index + 1}}</td>
+					<td>{{players[d.id].name}}</td>
+					<td class='text-right'>{{d.deltaelo | float: 1}}</td>
+					<td><i class="fa" ng-class="{'lost fa-caret-down': d.deltaelo < 0, 'won fa-caret-up': d.deltaelo > 0}"></i></td>
+					<td class="text-center">{{d.wins / d.total | percent: 1}}</td>
+					<td class="text-center">{{d.total}}</td>
+					<td class="text-center">{{d.goaldiff}}</td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
 
